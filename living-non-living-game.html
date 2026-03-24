@@ -1,767 +1,570 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Living, Dead, or Non-Living? — 6th Grade Science Game</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #f5f5f0;
-      color: #1a1a1a;
-      min-height: 100vh;
-      padding: 1.5rem 1rem 3rem;
-    }
-
-    .container {
-      max-width: 680px;
-      margin: 0 auto;
-    }
-
-    /* ── Header ── */
-    .hdr {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    .hdr h1 {
-      font-size: 26px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 4px;
-    }
-    .hdr p {
-      font-size: 15px;
-      color: #666;
-    }
-
-    /* ── Score bar ── */
-    .sbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 10px 18px;
-      margin-bottom: 1.25rem;
-      font-size: 14px;
-      color: #555;
-    }
-    .sbar .score-val {
-      font-weight: 700;
-      font-size: 16px;
-      color: #1a1a1a;
-    }
-
-    /* ── Tabs ── */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 1.25rem;
-    }
-    .tb {
-      flex: 1;
-      padding: 10px 6px;
-      cursor: pointer;
-      border: 1.5px solid #ddd;
-      border-radius: 10px;
-      background: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      color: #888;
-      font-family: inherit;
-      transition: all 0.15s;
-    }
-    .tb:hover { border-color: #bbb; color: #555; }
-    .tb.active {
-      background: #1a1a1a;
-      color: #fff;
-      border-color: #1a1a1a;
-    }
-
-    /* ── Progress pips ── */
-    .plabel {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: #999;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .prow {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 1.25rem;
-    }
-    .pip {
-      flex: 1;
-      height: 5px;
-      border-radius: 99px;
-      background: #e0e0e0;
-    }
-    .pip.done { background: #3b6d11; }
-    .pip.cur  { background: #ba7517; }
-
-    /* ── Question card ── */
-    .qcard {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    /* ── Image area ── */
-    .img-wrap {
-      width: 100%;
-      height: 220px;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 1.1rem;
-      background: #f0f0ec;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-    .emoji-fb { font-size: 80px; line-height: 1; }
-
-    /* ── Question text ── */
-    .qtext {
-      font-size: 19px;
-      font-weight: 700;
-      color: #1a1a1a;
-      text-align: center;
-      margin-bottom: 6px;
-    }
-    .qhint {
-      font-size: 14px;
-      color: #777;
-      text-align: center;
-      font-style: italic;
-      margin-bottom: 1.3rem;
-      line-height: 1.5;
-    }
-
-    /* ── Choice buttons ── */
-    .choices {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 0;
-    }
-    .cb {
-      background: #f5f5f0;
-      border: 1.5px solid #ddd;
-      border-radius: 10px;
-      padding: 14px 8px;
-      cursor: pointer;
-      text-align: center;
-      font-size: 13px;
-      font-weight: 600;
-      color: #333;
-      font-family: inherit;
-      transition: background 0.12s, border-color 0.12s;
-      line-height: 1.4;
-    }
-    .cb:hover:not(:disabled) { background: #ebebeb; border-color: #bbb; }
-    .cb.correct { background: #eaf3de; border-color: #639922; color: #3b6d11; }
-    .cb.wrong   { background: #fcebeb; border-color: #a32d2d; color: #791f1f; }
-    .cb:disabled { cursor: default; }
-
-    /* ── Feedback box ── */
-    .fb {
-      display: none;
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-top: 1rem;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .fb.show   { display: block; }
-    .fb.correct { background: #eaf3de; color: #3b6d11; border: 1px solid #97c459; }
-    .fb.wrong   { background: #fcebeb; color: #791f1f; border: 1px solid #f09595; }
-
-    /* ── Next button ── */
-    .nxt {
-      display: none;
-      width: 100%;
-      margin-top: 12px;
-      background: #1a1a1a;
-      border: none;
-      border-radius: 10px;
-      padding: 13px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-      color: #fff;
-      font-family: inherit;
-      transition: background 0.12s;
-    }
-    .nxt:hover { background: #333; }
-    .nxt.show { display: block; }
-
-    /* ── Debate cards ── */
-    .dcard {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 14px;
-      padding: 1.1rem 1.25rem;
-      margin-bottom: 12px;
-    }
-    .dimg {
-      width: 100%;
-      height: 170px;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 10px;
-      background: #f0f0ec;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .dimg img { width: 100%; height: 100%; object-fit: cover; }
-    .dcard h3 {
-      font-size: 16px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 5px;
-    }
-    .dcard p {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 12px;
-      line-height: 1.55;
-    }
-    .rvl {
-      background: #f5f5f0;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      color: #333;
-      font-family: inherit;
-      transition: background 0.12s;
-    }
-    .rvl:hover { background: #ebebeb; }
-    .vdict {
-      display: none;
-      margin-top: 10px;
-      font-size: 13px;
-      padding: 10px 13px;
-      border-radius: 9px;
-      line-height: 1.6;
-      font-weight: 500;
-    }
-    .vdict.show    { display: block; }
-    .vdict.living  { background: #eaf3de; color: #3b6d11; border: 1px solid #97c459; }
-    .vdict.dead    { background: #faeeda; color: #633806; border: 1px solid #ef9f27; }
-    .vdict.nonliving { background: #e6f1fb; color: #0c447c; border: 1px solid #85b7eb; }
-
-    /* ── CER card ── */
-    .cercard {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 10px;
-    }
-    .cercard .cq {
-      font-size: 16px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 6px;
-      line-height: 1.5;
-    }
-    .cercard .csub {
-      font-size: 13px;
-      color: #777;
-      margin-bottom: 1.1rem;
-      line-height: 1.5;
-    }
-    .cerimg {
-      width: 100%;
-      height: 190px;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 1.1rem;
-      background: #f0f0ec;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .cerimg img { width: 100%; height: 100%; object-fit: cover; }
-    .clabel {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: #999;
-      text-transform: uppercase;
-      margin-bottom: 5px;
-    }
-    .cercard textarea {
-      width: 100%;
-      border: 1.5px solid #ddd;
-      border-radius: 9px;
-      padding: 10px 12px;
-      font-size: 14px;
-      line-height: 1.6;
-      resize: vertical;
-      min-height: 82px;
-      background: #fafaf8;
-      color: #1a1a1a;
-      font-family: inherit;
-      margin-bottom: 12px;
-      transition: border-color 0.12s;
-    }
-    .cercard textarea:focus { outline: none; border-color: #888; }
-    .subcer {
-      background: #1a1a1a;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      color: #fff;
-      font-family: inherit;
-      transition: background 0.12s;
-    }
-    .subcer:hover { background: #333; }
-
-    /* ── CER note (shown after submit) ── */
-    .cer-note {
-      display: none;
-      margin-top: 12px;
-      font-size: 13px;
-      color: #555;
-      background: #f5f5f0;
-      border: 1px solid #ddd;
-      border-radius: 9px;
-      padding: 10px 13px;
-      line-height: 1.6;
-    }
-    .cer-note.show { display: block; }
-
-    /* ── Final card ── */
-    .fincard {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 16px;
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-    }
-    .fin-stars   { font-size: 36px; margin-bottom: 10px; }
-    .fin-score   { font-size: 42px; font-weight: 800; color: #1a1a1a; }
-    .fin-lbl     { font-size: 15px; color: #666; margin: 6px 0 1.75rem; }
-    .restart {
-      background: #1a1a1a;
-      border: none;
-      border-radius: 10px;
-      padding: 13px 32px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-      color: #fff;
-      font-family: inherit;
-      transition: background 0.12s;
-    }
-    .restart:hover { background: #333; }
-
-    /* ── Category legend ── */
-    .legend {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
-    }
-    .leg-pill {
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 99px;
-    }
-    .leg-pill.living    { background: #eaf3de; color: #3b6d11; }
-    .leg-pill.dead      { background: #faeeda; color: #633806; }
-    .leg-pill.nonliving { background: #e6f1fb; color: #0c447c; }
-
-    .hidden { display: none !important; }
-
-    /* ── Responsive ── */
-    @media (max-width: 420px) {
-      .choices { grid-template-columns: 1fr; }
-      .tabs { flex-direction: column; }
-      .hdr h1 { font-size: 22px; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Living, Dead, or Non-Living? — 6th Grade Science Game</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh;padding:1.5rem 1rem 3rem}
+.container{max-width:700px;margin:0 auto}
+.hdr{text-align:center;margin-bottom:1.25rem}
+.hdr h1{font-size:26px;font-weight:800;color:#1a1a1a;margin-bottom:4px}
+.hdr p{font-size:14px;color:#666}
+.sbar{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:10px 18px;margin-bottom:1.1rem;font-size:13px;color:#555;flex-wrap:wrap;gap:6px}
+.sbar .sv{font-weight:800;font-size:16px;color:#1a1a1a}
+.tabs{display:flex;gap:8px;margin-bottom:1.1rem}
+.tb{flex:1;padding:10px 6px;cursor:pointer;border:1.5px solid #ddd;border-radius:10px;background:#fff;font-size:13px;font-weight:700;color:#888;font-family:inherit;transition:all .15s}
+.tb:hover{border-color:#bbb;color:#555}
+.tb.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.plabel{font-size:11px;font-weight:700;letter-spacing:.08em;color:#999;text-transform:uppercase;margin-bottom:8px}
+.prow{display:flex;gap:5px;margin-bottom:1.1rem}
+.pip{flex:1;height:5px;border-radius:99px;background:#e0e0e0}
+.pip.done{background:#3b6d11}
+.pip.cur{background:#ba7517}
+.qcard{background:#fff;border:1px solid #e0e0e0;border-radius:16px;padding:1.4rem;margin-bottom:1rem}
+.img-wrap{width:100%;height:220px;border-radius:10px;overflow:hidden;margin-bottom:1rem;background:#f0f0ec;display:flex;align-items:center;justify-content:center}
+.img-wrap img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.efb{font-size:80px;line-height:1}
+.qtext{font-size:18px;font-weight:800;color:#1a1a1a;text-align:center;margin-bottom:6px}
+.qhint{font-size:13px;color:#777;text-align:center;font-style:italic;margin-bottom:1.2rem;line-height:1.5}
+.choices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.cb{background:#f5f5f0;border:1.5px solid #ddd;border-radius:10px;padding:13px 8px;cursor:pointer;text-align:center;font-size:13px;font-weight:700;color:#333;font-family:inherit;transition:background .12s,border-color .12s;line-height:1.4}
+.cb:hover:not(:disabled){background:#ebebeb;border-color:#bbb}
+.cb.correct{background:#eaf3de;border-color:#639922;color:#3b6d11}
+.cb.wrong{background:#fcebeb;border-color:#a32d2d;color:#791f1f}
+.cb:disabled{cursor:default}
+.fb{display:none;border-radius:10px;padding:12px 14px;margin-top:1rem;font-size:14px;line-height:1.6}
+.fb.show{display:block}
+.fb.correct{background:#eaf3de;color:#3b6d11;border:1px solid #97c459}
+.fb.wrong{background:#fcebeb;color:#791f1f;border:1px solid #f09595}
+.nxt{display:none;width:100%;margin-top:12px;background:#1a1a1a;border:none;border-radius:10px;padding:13px;cursor:pointer;font-size:15px;font-weight:700;color:#fff;font-family:inherit;transition:background .12s}
+.nxt:hover{background:#333}
+.nxt.show{display:block}
+/* Round 2 */
+.r2-scorebar{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.r2-score-card{flex:1;min-width:120px;background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;padding:10px 14px;text-align:center}
+.r2-score-card .r2-name{font-size:12px;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.r2-score-card .r2-pts{font-size:28px;font-weight:800;color:#1a1a1a}
+.r2-score-card.leader{border-color:#ba7517;background:#fdf6ec}
+.r2-score-card.leader .r2-pts{color:#ba7517}
+.dcard{background:#fff;border:1px solid #e0e0e0;border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:12px}
+.dimg{width:100%;height:170px;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#f0f0ec;display:flex;align-items:center;justify-content:center}
+.dimg img{width:100%;height:100%;object-fit:cover}
+.dcard h3{font-size:16px;font-weight:800;color:#1a1a1a;margin-bottom:5px}
+.dcard .dq{font-size:13px;color:#666;margin-bottom:10px;line-height:1.55}
+.r2-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.r2-btn{background:#f5f5f0;border:1.5px solid #ddd;border-radius:9px;padding:11px 6px;cursor:pointer;font-size:12px;font-weight:700;color:#333;font-family:inherit;transition:background .12s;text-align:center}
+.r2-btn:hover:not(:disabled){background:#ebebeb;border-color:#bbb}
+.r2-btn.correct{background:#eaf3de;border-color:#639922;color:#3b6d11}
+.r2-btn.wrong{background:#fcebeb;border-color:#a32d2d;color:#791f1f}
+.r2-btn:disabled{cursor:default}
+.r2-reveal{display:none;border-radius:9px;padding:10px 12px;margin-top:4px;font-size:13px;line-height:1.6;font-weight:500}
+.r2-reveal.show{display:block}
+.r2-reveal.living{background:#eaf3de;color:#3b6d11;border:1px solid #97c459}
+.r2-reveal.dead{background:#faeeda;color:#633806;border:1px solid #ef9f27}
+.r2-reveal.nonliving{background:#e6f1fb;color:#0c447c;border:1px solid #85b7eb}
+.r2-next{display:none;width:100%;margin-top:8px;background:#1a1a1a;border:none;border-radius:9px;padding:11px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;font-family:inherit}
+.r2-next:hover{background:#333}
+.r2-next.show{display:block}
+.r2-winner{display:none;background:#fff;border:1.5px solid #ba7517;border-radius:14px;padding:1.25rem;text-align:center;margin-bottom:12px}
+.r2-winner.show{display:block}
+.r2-winner h3{font-size:18px;font-weight:800;margin-bottom:6px}
+.r2-winner p{font-size:14px;color:#666}
+/* Round 3 */
+.cercard{background:#fff;border:1px solid #e0e0e0;border-radius:16px;padding:1.4rem;margin-bottom:10px}
+.cercard .cq{font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:6px;line-height:1.5}
+.cercard .csub{font-size:13px;color:#777;margin-bottom:1rem;line-height:1.5}
+.cerimg{width:100%;height:185px;border-radius:10px;overflow:hidden;margin-bottom:1rem;background:#f0f0ec;display:flex;align-items:center;justify-content:center}
+.cerimg img{width:100%;height:100%;object-fit:cover}
+.clabel{font-size:11px;font-weight:700;letter-spacing:.08em;color:#999;text-transform:uppercase;margin-bottom:5px}
+.cercard textarea{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:10px 12px;font-size:14px;line-height:1.6;resize:vertical;min-height:82px;background:#fafaf8;color:#1a1a1a;font-family:inherit;margin-bottom:12px;transition:border-color .12s}
+.cercard textarea:focus{outline:none;border-color:#888}
+.subcer{background:#1a1a1a;border:none;border-radius:10px;padding:12px 20px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;font-family:inherit;transition:background .12s}
+.subcer:hover{background:#333}
+.cer-note{display:none;margin-top:12px;font-size:13px;color:#555;background:#f5f5f0;border:1px solid #ddd;border-radius:9px;padding:10px 13px;line-height:1.6}
+.cer-note.show{display:block}
+/* Final */
+.fincard{background:#fff;border:1px solid #e0e0e0;border-radius:16px;padding:2.5rem 1.5rem;text-align:center}
+.fin-stars{font-size:36px;margin-bottom:10px}
+.fin-score{font-size:42px;font-weight:800;color:#1a1a1a}
+.fin-lbl{font-size:15px;color:#666;margin:6px 0 1.75rem;line-height:1.5}
+.restart{background:#1a1a1a;border:none;border-radius:10px;padding:13px 32px;cursor:pointer;font-size:15px;font-weight:700;color:#fff;font-family:inherit;transition:background .12s}
+.restart:hover{background:#333}
+.legend{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.leg{font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px}
+.leg.living{background:#eaf3de;color:#3b6d11}
+.leg.dead{background:#faeeda;color:#633806}
+.leg.nonliving{background:#e6f1fb;color:#0c447c}
+.hidden{display:none!important}
+.r2-qcount{font-size:12px;color:#999;text-align:right;margin-bottom:6px}
+@media(max-width:440px){.choices,.r2-btns{grid-template-columns:1fr}.tabs{flex-direction:column}.hdr h1{font-size:21px}}
+</style>
 </head>
 <body>
 <div class="container">
 
-  <div class="hdr">
-    <h1>Living, Dead, or Non-Living?</h1>
-    <p>Look at each image, then decide with your partner!</p>
+<div class="hdr">
+  <h1>Living, Dead, or Non-Living?</h1>
+  <p>Look at each image, then decide with your partner!</p>
+</div>
+
+<div class="sbar">
+  <div>Partner challenge &mdash; discuss before every answer</div>
+  <div>Round 1 Score: <span class="sv" id="sc">0</span> / <span class="sv" id="tot">8</span></div>
+</div>
+
+<div class="tabs">
+  <button class="tb active" onclick="goTab('r1')">Round 1: Classify It</button>
+  <button class="tb"        onclick="goTab('r2')">Round 2: Debate It</button>
+  <button class="tb"        onclick="goTab('r3')">Round 3: Defend It</button>
+</div>
+
+<!-- ═══════════════════════════════════════ ROUND 1 ═══ -->
+<div id="r1">
+  <div class="plabel">Round 1 &mdash; Look at the image, then classify</div>
+  <div class="legend">
+    <span class="leg living">Living</span>
+    <span class="leg dead">Dead (once living)</span>
+    <span class="leg nonliving">Non-living</span>
   </div>
-
-  <div class="sbar">
-    <div>Partner challenge &mdash; discuss before every answer</div>
-    <div>Score: <span class="score-val" id="sc">0</span> / <span class="score-val" id="tot">8</span></div>
+  <div class="prow" id="prow"></div>
+  <div class="qcard">
+    <div class="img-wrap" id="qimgwrap"></div>
+    <div class="qtext" id="qt"></div>
+    <div class="qhint" id="qh"></div>
+    <div class="choices">
+      <button class="cb" id="bl" onclick="ans('living')">Living</button>
+      <button class="cb" id="bd" onclick="ans('dead')">Dead<br>(once living)</button>
+      <button class="cb" id="bn" onclick="ans('nonliving')">Non-living</button>
+    </div>
+    <div class="fb" id="fbx"></div>
+    <button class="nxt" id="nxtb" onclick="nextQ()">Next Question &rarr;</button>
   </div>
+</div>
 
-  <div class="tabs">
-    <button class="tb active" onclick="goTab('r1')">Round 1: Classify It</button>
-    <button class="tb"        onclick="goTab('r2')">Round 2: Debate It</button>
-    <button class="tb"        onclick="goTab('r3')">Round 3: Defend It</button>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       ROUND 1 — CLASSIFY IT
-  ══════════════════════════════════════ -->
-  <div id="r1">
-    <div class="plabel">Round 1 &mdash; Look at the image, then classify</div>
-    <div class="legend">
-      <span class="leg-pill living">Living</span>
-      <span class="leg-pill dead">Dead (once living)</span>
-      <span class="leg-pill nonliving">Non-living</span>
+<!-- ═══════════════════════════════════════ ROUND 2 ═══ -->
+<div id="r2" class="hidden">
+  <div class="plabel">Round 2 &mdash; Each partner answers — who scores more?</div>
+  <div class="r2-scorebar">
+    <div class="r2-score-card" id="p1card">
+      <div class="r2-name">Player 1</div>
+      <div class="r2-pts" id="p1pts">0</div>
     </div>
-    <div class="prow" id="prow"></div>
-    <div class="qcard">
-      <div class="img-wrap" id="qimgwrap"></div>
-      <div class="qtext" id="qt"></div>
-      <div class="qhint" id="qh"></div>
-      <div class="choices">
-        <button class="cb" id="bl" onclick="ans('living')">Living</button>
-        <button class="cb" id="bd" onclick="ans('dead')">Dead<br>(once living)</button>
-        <button class="cb" id="bn" onclick="ans('nonliving')">Non-living</button>
-      </div>
-      <div class="fb" id="fbx"></div>
-      <button class="nxt" id="nxtb" onclick="nextQ()">Next Question &rarr;</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       ROUND 2 — DEBATE IT
-  ══════════════════════════════════════ -->
-  <div id="r2" class="hidden">
-    <div class="plabel">Round 2 &mdash; Look at the image, debate with your partner, then reveal</div>
-
-    <div class="dcard">
-      <div class="dimg">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Baa_lamb.jpg/640px-Baa_lamb.jpg"
-             alt="sheep being sheared"
-             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🧥</span>'" />
-      </div>
-      <h3>A wool sweater</h3>
-      <p>Wool comes from a living sheep. The sheep is sheared &mdash; not harmed. Is the sweater living, dead, or non-living?</p>
-      <button class="rvl" onclick="rv('d1')">Reveal Answer</button>
-      <div class="vdict nonliving" id="d1">
-        <strong>Non-living</strong> &mdash; The wool was part of a living sheep, but it was processed (sheared, spun, and knitted into fabric). That process changes its category to non-living.
-      </div>
-    </div>
-
-    <div class="dcard">
-      <div class="dimg">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Chrysalis.jpg/640px-Chrysalis.jpg"
-             alt="chrysalis on a branch"
-             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🦋</span>'" />
-      </div>
-      <h3>A caterpillar inside a chrysalis</h3>
-      <p>It is hanging from a branch. It is not moving. It looks like a dry shell. Is it living, dead, or non-living?</p>
-      <button class="rvl" onclick="rv('d2')">Reveal Answer</button>
-      <div class="vdict living" id="d2">
-        <strong>Living</strong> &mdash; Inside the chrysalis, the caterpillar is transforming into a butterfly. It is still using energy and developing. Not moving does not mean not alive!
-      </div>
-    </div>
-
-    <div class="dcard">
-      <div class="dimg">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Fossilized_shark_tooth.jpg/640px-Fossilized_shark_tooth.jpg"
-             alt="shark tooth on sand"
-             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🦷</span>'" />
-      </div>
-      <h3>A shark tooth on the beach</h3>
-      <p>Sharks naturally shed thousands of teeth in their lifetime. The shark is still alive somewhere in the ocean. Is the tooth living, dead, or non-living?</p>
-      <button class="rvl" onclick="rv('d3')">Reveal Answer</button>
-      <div class="vdict dead" id="d3">
-        <strong>Dead (once living)</strong> &mdash; The tooth was a living part of a living shark. Once separated from the body, it no longer carries out life processes. It is classified as dead &mdash; once living.
-      </div>
-    </div>
-
-    <div class="dcard">
-      <div class="dimg">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Coral_reef_at_palmyra.jpg/640px-Coral_reef_at_palmyra.jpg"
-             alt="colorful coral reef underwater"
-             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🪸</span>'" />
-      </div>
-      <h3>Coral in the ocean</h3>
-      <p>It looks like a colorful rock on the ocean floor. It does not have legs or eyes. It grows very, very slowly. Is it living, dead, or non-living?</p>
-      <button class="rvl" onclick="rv('d4')">Reveal Answer</button>
-      <div class="vdict living" id="d4">
-        <strong>Living</strong> &mdash; Coral is made up of tiny living animals called polyps. It grows, reproduces, responds to its environment, and uses energy. Looks can be deceiving!
-      </div>
-    </div>
-
-    <div class="dcard">
-      <div class="dimg">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Oranges_and_orange_juice.jpg/640px-Oranges_and_orange_juice.jpg"
-             alt="glass of orange juice next to oranges"
-             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🍊</span>'" />
-      </div>
-      <h3>A glass of orange juice</h3>
-      <p>It was made by squeezing oranges that grew on a tree. Is the orange juice living, dead, or non-living?</p>
-      <button class="rvl" onclick="rv('d5')">Reveal Answer</button>
-      <div class="vdict nonliving" id="d5">
-        <strong>Non-living</strong> &mdash; Oranges came from a living tree, but squeezing them into juice transforms the material into something new. The juice is now non-living.
-      </div>
+    <div class="r2-score-card" id="p2card">
+      <div class="r2-name">Player 2</div>
+      <div class="r2-pts" id="p2pts">0</div>
     </div>
   </div>
-
-  <!-- ══════════════════════════════════════
-       ROUND 3 — DEFEND IT (CER)
-  ══════════════════════════════════════ -->
-  <div id="r3" class="hidden">
-    <div class="plabel">Round 3 &mdash; Look at the image and write a CER together</div>
-    <div class="cercard">
-      <div class="cerimg">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Acorn_on_white_background.jpg/640px-Acorn_on_white_background.jpg"
-             alt="an acorn on a white background"
-             onerror="this.parentNode.innerHTML='<span style=font-size:72px>🌰</span>'" />
-      </div>
-      <p class="cq">A student finds a hard, brown object in the schoolyard. It has a rough shell on the outside and a soft white inside. It fell from the large oak tree nearby. Is this object living, dead, or non-living? How do you know?</p>
-      <p class="csub">Use evidence from the characteristics of living things to support your answer.</p>
-
-      <div class="clabel">Claim &mdash; What category is it?</div>
-      <textarea id="cc" placeholder="The object is _______ because..."></textarea>
-
-      <div class="clabel">Evidence &mdash; What facts support your claim?</div>
-      <textarea id="ce" placeholder="We know this because..."></textarea>
-
-      <div class="clabel">Reasoning &mdash; How does your evidence connect to science?</div>
-      <textarea id="crr" placeholder="This connects to the characteristic of... which means..."></textarea>
-
-      <button class="subcer" onclick="submitCER()">Check Our Thinking</button>
-      <div class="cer-note" id="cernote"></div>
-    </div>
+  <div class="r2-qcount" id="r2qcount"></div>
+  <div id="r2area"></div>
+  <div class="r2-winner" id="r2winner">
+    <h3 id="r2winnertext"></h3>
+    <p id="r2winnerpts"></p>
   </div>
+</div>
 
-  <!-- ══════════════════════════════════════
-       FINAL SCREEN
-  ══════════════════════════════════════ -->
-  <div id="rfin" class="hidden">
-    <div class="fincard">
-      <div class="fin-stars" id="starr"></div>
-      <div class="fin-score"  id="fscore"></div>
-      <div class="fin-lbl"    id="flbl"></div>
-      <button class="restart" onclick="restart()">Play Again</button>
-    </div>
+<!-- ═══════════════════════════════════════ ROUND 3 ═══ -->
+<div id="r3" class="hidden">
+  <div class="plabel">Round 3 &mdash; Look at the image and write a CER together</div>
+  <div class="cercard" id="cercard">
+    <div class="cerimg"><img id="cerimg" alt="mystery object" onerror="this.parentNode.innerHTML='<span style=font-size:72px>'+cerEmoji+'</span>'"/></div>
+    <p class="cq" id="cerq"></p>
+    <p class="csub">Use evidence from the characteristics of living things to support your answer.</p>
+    <div class="clabel">Claim &mdash; What category is it?</div>
+    <textarea id="cc" placeholder="The object is _______ because..."></textarea>
+    <div class="clabel">Evidence &mdash; What facts support your claim?</div>
+    <textarea id="ce" placeholder="We know this because..."></textarea>
+    <div class="clabel">Reasoning &mdash; How does your evidence connect to science?</div>
+    <textarea id="crr" placeholder="This connects to the characteristic of... which means..."></textarea>
+    <button class="subcer" onclick="submitCER()">Check Our Thinking</button>
+    <div class="cer-note" id="cernote"></div>
   </div>
+</div>
+
+<!-- ═══════════════════════════════════════ FINAL ═══ -->
+<div id="rfin" class="hidden">
+  <div class="fincard">
+    <div class="fin-stars" id="starr"></div>
+    <div class="fin-score"  id="fscore"></div>
+    <div class="fin-lbl"    id="flbl"></div>
+    <button class="restart" onclick="restart()">Play Again</button>
+  </div>
+</div>
 
 </div><!-- /container -->
-
 <script>
-  const Qs = [
-    {
-      text: "A honeybee flying between flowers",
-      hint: "What life processes is it doing right now?",
-      answer: "living",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Apis_mellifera_flying.jpg/640px-Apis_mellifera_flying.jpg",
-      emoji: "🐝",
-      explanation: "Correct! The honeybee is living. It moves, responds to its environment, uses energy, and can reproduce. It shows many characteristics of living things."
-    },
-    {
-      text: "A shed snake skin on the ground",
-      hint: "The snake that shed this is still alive somewhere nearby.",
-      answer: "dead",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Snake_shedding.jpg/640px-Snake_shedding.jpg",
-      emoji: "🐍",
-      explanation: "Correct! The shed skin was a living part of a living snake. Once separated from the snake's body, it is classified as dead — once living."
-    },
-    {
-      text: "A glass marble",
-      hint: "Was this object ever part of any living organism?",
-      answer: "nonliving",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Marble_collection.jpg/640px-Marble_collection.jpg",
-      emoji: "🔵",
-      explanation: "Correct! A glass marble is made from sand and minerals that were never alive. It has no potential to grow or reproduce. It is non-living."
-    },
-    {
-      text: "An empty bird's nest on the ground",
-      hint: "Birds built this from twigs and dried grass. Where did those materials come from?",
-      answer: "dead",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Bird_nest_without_bird.jpg/640px-Bird_nest_without_bird.jpg",
-      emoji: "🪹",
-      explanation: "Correct! The nest is made of twigs and dried grass that were once part of living plants. The nest is classified as dead — once living."
-    },
-    {
-      text: "A spider spinning a web",
-      hint: "The web is not alive — but what about the spider making it?",
-      answer: "living",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Garden_spider_spinning_web.jpg/640px-Garden_spider_spinning_web.jpg",
-      emoji: "🕷️",
-      explanation: "Correct! The spider is living. It responds to stimuli, uses energy, grows, and reproduces. The web it spins is non-living, but the spider itself is very much alive."
-    },
-    {
-      text: "A rubber car tire",
-      hint: "Natural rubber comes from rubber trees. But what happened to it after?",
-      answer: "nonliving",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Worn_tire.jpg/640px-Worn_tire.jpg",
-      emoji: "⚫",
-      explanation: "Correct! Natural rubber comes from living trees, but it was heavily processed and manufactured into a tire. That process changes its category to non-living."
-    },
-    {
-      text: "A bear in deep winter hibernation",
-      hint: "It is barely breathing and not moving at all. Does that mean it is not alive?",
-      answer: "living",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Ours_brun_parcanimalierpyrenees_1.jpg/640px-Ours_brun_parcanimalierpyrenees_1.jpg",
-      emoji: "🐻",
-      explanation: "Correct! A hibernating bear is still living. Its metabolism has slowed way down, but it is still maintaining homeostasis and carrying out life processes. It will wake up in spring."
-    },
-    {
-      text: "A fossilized dinosaur bone in a museum",
-      hint: "Over millions of years, minerals replaced all the original bone material.",
-      answer: "nonliving",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Dinosaur_bone_dig.jpg/640px-Dinosaur_bone_dig.jpg",
-      emoji: "🦕",
-      explanation: "Tricky one! A fossilized bone is non-living. Minerals completely replaced the original living material over millions of years — a natural process that transforms it into rock-like minerals, moving it out of the dead category into non-living."
-    }
-  ];
+/* ═══════════════════════════════════════════════════
+   OBJECT BANK — 40 objects for Round 1
+═══════════════════════════════════════════════════ */
+const BANK = [
+  {text:"A honeybee flying between flowers",hint:"What life processes is it doing right now?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Apis_mellifera_flying.jpg/640px-Apis_mellifera_flying.jpg",emoji:"🐝",exp:"Correct! The honeybee is living. It moves, uses energy, responds to the environment, and can reproduce."},
+  {text:"A shed snake skin on the ground",hint:"The snake that shed this is still alive nearby.",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Corn_snake_shedding.jpg/640px-Corn_snake_shedding.jpg",emoji:"🐍",exp:"Correct! The shed skin was a living part of a living snake. Once separated, it is classified as dead — once living."},
+  {text:"A glass marble",hint:"Was this object ever part of any living organism?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Marble_collection.jpg/640px-Marble_collection.jpg",emoji:"🔵",exp:"Correct! A glass marble is made from minerals that were never alive. It cannot grow or reproduce. It is non-living."},
+  {text:"An empty bird's nest on the ground",hint:"Birds built this from twigs and dried grass. Where did those materials come from?",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Nest_with_no_eggs.jpg/640px-Nest_with_no_eggs.jpg",emoji:"🪹",exp:"Correct! The nest is made of twigs and dried grass that were once part of living plants. The nest is classified as dead — once living."},
+  {text:"A spider spinning a web",hint:"The web is not alive — but what about the spider?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Garden_spider_spider_web.jpg/640px-Garden_spider_spider_web.jpg",emoji:"🕷️",exp:"Correct! The spider is living. It responds to its environment, uses energy, grows, and can reproduce."},
+  {text:"A rubber car tire",hint:"Natural rubber comes from rubber trees. But what happened to it after?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Worn_tire.jpg/640px-Worn_tire.jpg",emoji:"⚫",exp:"Correct! Rubber comes from living trees but was processed and manufactured into a tire. That process changes its category to non-living."},
+  {text:"A bear in deep winter hibernation",hint:"It is barely breathing and not moving. Does that mean it is not alive?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Ours_brun_parcanimalierpyrenees_1.jpg/640px-Ours_brun_parcanimalierpyrenees_1.jpg",emoji:"🐻",exp:"Correct! A hibernating bear is still living. Its metabolism slowed to save energy, but it is still maintaining homeostasis and will wake in spring."},
+  {text:"A fossilized dinosaur bone in a museum",hint:"Over millions of years, minerals replaced all the original bone material.",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Dinosaur_fossil_bones.jpg/640px-Dinosaur_fossil_bones.jpg",emoji:"🦕",exp:"Tricky! A fossilized bone is non-living. Minerals replaced the original living material over millions of years — it has been completely transformed."},
+  {text:"A sunflower growing in a garden",hint:"Look closely — is it carrying out any life processes?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Sunflower_sky_backdrop.jpg/640px-Sunflower_sky_backdrop.jpg",emoji:"🌻",exp:"Correct! A sunflower is living. It grows, uses sunlight to make energy, responds to light, and can reproduce through seeds."},
+  {text:"A piece of coal",hint:"Coal forms from ancient plant matter compressed underground for millions of years.",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Coal_anthracite.jpg/640px-Coal_anthracite.jpg",emoji:"🪨",exp:"Correct! Coal forms from compressed plant material over millions of years. Like a fossil, the original living material has been completely transformed — it is non-living."},
+  {text:"A mushroom growing on a log",hint:"It is growing right now and will produce spores.",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Mushroom_On_A_Log.jpg/640px-Mushroom_On_A_Log.jpg",emoji:"🍄",exp:"Correct! A mushroom is a living fungus. It grows, uses energy, and reproduces through spores."},
+  {text:"A dried pressed flower in a book",hint:"It was once blooming. Think about what it is doing now.",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Pressed_flowers.jpg/640px-Pressed_flowers.jpg",emoji:"🌸",exp:"Correct! The dried flower was once a living part of a living plant. Once dried and pressed, it is classified as dead — once living."},
+  {text:"A piece of granite rock",hint:"Granite forms from cooled magma. Was it ever part of a living thing?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Grani-2.jpg/640px-Grani-2.jpg",emoji:"🪨",exp:"Correct! Granite is a mineral that forms from magma. It was never part of any living organism. It is non-living."},
+  {text:"A caterpillar munching a leaf",hint:"Look at all the things it is doing at once.",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Caterpillar_Saturnia_pavonia.jpg/640px-Caterpillar_Saturnia_pavonia.jpg",emoji:"🐛",exp:"Correct! The caterpillar is living. It eats (uses energy), grows, responds to touch, and will eventually reproduce as a butterfly or moth."},
+  {text:"A cotton t-shirt",hint:"Cotton fibers come from the cotton plant. But what happened after harvesting?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/plain_white_t-shirt.jpg/640px-plain_white_t-shirt.jpg",emoji:"👕",exp:"Correct! Cotton came from a living plant, but it was processed (harvested, spun, woven, sewn) into a t-shirt. That process makes it non-living."},
+  {text:"A dormant tulip bulb in winter soil",hint:"Nothing is sprouting. Is it still alive?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Tulip_bulbs.jpg/640px-Tulip_bulbs.jpg",emoji:"🌷",exp:"Correct! A dormant bulb is living. It has the potential to sprout and grow into a flowering plant in spring. Potential counts!"},
+  {text:"A dog bone from the pet store",hint:"It was made from animal parts. Is it still part of a living animal?",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/DogBone.svg/640px-DogBone.svg",emoji:"🦴",exp:"Correct! A dog bone is made from animal material — once a living part of a living animal. It is classified as dead — once living."},
+  {text:"A sand dollar found on the beach",hint:"Sand dollars are animals. This one is bleached white and dry.",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Sand_dollar_on_beach.jpg/640px-Sand_dollar_on_beach.jpg",emoji:"🔵",exp:"Correct! A dry, bleached sand dollar is the skeleton of an animal that once lived. It is classified as dead — once living."},
+  {text:"A pot of boiling water on a stove",hint:"It is moving and producing steam. Does that make it alive?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Boiling_water_pot.jpg/640px-Boiling_water_pot.jpg",emoji:"💧",exp:"Correct! Boiling water moves and changes, but it has never been alive. It cannot grow, reproduce, or respond to stimuli the way living things can. It is non-living."},
+  {text:"A lichen growing on a rock",hint:"It looks like a crusty stain. But it is growing very slowly.",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Lichen_on_rock.jpg/640px-Lichen_on_rock.jpg",emoji:"🪨",exp:"Correct! Lichen is actually two living organisms — a fungus and algae — living together. It grows, responds to its environment, and reproduces. It is living!"},
+  {text:"A piece of driftwood on the shore",hint:"It was once a tree branch. What is it doing now?",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Driftwood_beach.jpg/640px-Driftwood_beach.jpg",emoji:"🪵",exp:"Correct! Driftwood was once part of a living tree. Separated from the tree, dried out, and no longer carrying out life processes — it is dead, once living."},
+  {text:"A lit candle",hint:"It is burning and changing. Was it ever part of a living thing?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Candle.jpg/640px-Candle.jpg",emoji:"🕯️",exp:"Correct! A wax candle is made from petroleum or paraffin — substances that were never alive. It is non-living. (Beeswax candles come from bees, but the wax itself is a processed secretion, making it non-living too.)"},
+  {text:"A potato sitting on a counter",hint:"It has small buds called eyes. What could those become?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Potato_je.jpg/640px-Potato_je.jpg",emoji:"🥔",exp:"Correct! A potato is a living tuber. Its eyes have the potential to sprout roots and shoots and grow into a new potato plant. Potential counts!"},
+  {text:"A piece of ivory",hint:"Ivory comes from elephant tusks. The elephant is no longer alive.",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Elephant_tusk_ivory.jpg/640px-Elephant_tusk_ivory.jpg",emoji:"🐘",exp:"Correct! Ivory is tusk material — once a living part of a living elephant. Without further processing, it is classified as dead — once living."},
+  {text:"A plastic bag",hint:"Plastic is made from petroleum. Was petroleum ever alive?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Plastic_bag.jpg/640px-Plastic_bag.jpg",emoji:"🛍️",exp:"Correct! Plastic is made from refined petroleum, which comes from ancient organisms compressed over millions of years. But like coal, it has been so completely transformed that it is non-living."},
+  {text:"A starfish (sea star) on the ocean floor",hint:"It moves very slowly. Does it carry out life processes?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Sea_star_on_rock.jpg/640px-Sea_star_on_rock.jpg",emoji:"⭐",exp:"Correct! A sea star is a living animal. It moves, responds to its environment, uses energy, and can reproduce — even regrowing lost arms!"},
+  {text:"A feather on the ground",hint:"Feathers grow from birds. This one fell out naturally.",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Peacock_feather.jpg/640px-Peacock_feather.jpg",emoji:"🪶",exp:"Correct! A feather was a living part of a living bird. Once separated, it is no longer carrying out life processes. It is classified as dead — once living."},
+  {text:"A steel paper clip",hint:"Steel is made from iron ore. Was iron ore ever alive?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Paperclips.jpg/640px-Paperclips.jpg",emoji:"📎",exp:"Correct! A steel paper clip is made from iron ore and carbon — neither of which were ever alive. It is non-living."},
+  {text:"A Venus flytrap waiting for an insect",hint:"It is still. But watch what happens when something touches it.",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Venus_Flytrap_showing_trigger_hairs.jpg/640px-Venus_Flytrap_showing_trigger_hairs.jpg",emoji:"🌿",exp:"Correct! A Venus flytrap is a living plant. It responds to stimuli (touch), uses energy, grows, and reproduces — a perfect example of responding to the environment!"},
+  {text:"A piece of charcoal",hint:"Charcoal is made by burning wood without oxygen. Is it still wood?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Charcoal_drawing.jpg/640px-Charcoal_drawing.jpg",emoji:"🖤",exp:"Correct! Charcoal is made by burning and transforming wood (once living) through a chemical process. The original living material no longer exists — it is non-living."},
+  {text:"A robin sitting on its eggs in a nest",hint:"Look at everything happening in this picture.",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Robin_on_nest.jpg/640px-Robin_on_nest.jpg",emoji:"🐦",exp:"Correct! The robin is living. It breathes, uses energy, maintains homeostasis by keeping eggs warm, and is actively reproducing. The nest and eggs are separate — the bird is the living organism here."},
+  {text:"A seashell on the beach",hint:"A snail or mollusk once lived inside this shell.",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Sea_shell.jpg/640px-Sea_shell.jpg",emoji:"🐚",exp:"Correct! A seashell was produced by a living mollusk. The shell itself was once living tissue. Now that the animal is gone, the shell is classified as dead — once living."},
+  {text:"A glass of milk",hint:"Milk comes from a living cow. But what happened after it left the cow?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Milk_glass.jpg/640px-Milk_glass.jpg",emoji:"🥛",exp:"Correct! Milk comes from a living cow, but once collected and processed (pasteurized, bottled), it is no longer a living substance. It is non-living."},
+  {text:"A frog egg cluster in a pond",hint:"They look like clear jelly bubbles. Could they hatch?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Frog_eggs_in_water.jpg/640px-Frog_eggs_in_water.jpg",emoji:"🐸",exp:"Correct! Frog eggs are living — each contains a developing embryo with the potential to grow into a tadpole and then a frog. Potential counts as living!"},
+  {text:"A wooden pencil",hint:"Wood comes from trees. But what happened to this wood?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Pencil_bucket.jpg/640px-Pencil_bucket.jpg",emoji:"✏️",exp:"Correct! Wood was once part of a living tree, but it was processed (cut, dried, shaped, painted) into a pencil. That process changes its category to non-living."},
+  {text:"A cactus in the desert",hint:"It barely gets any water. Is it still alive?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Cactus_at_night.jpg/640px-Cactus_at_night.jpg",emoji:"🌵",exp:"Correct! A cactus is living. It stores water, grows slowly, responds to sunlight, uses energy, and can reproduce. Surviving tough conditions does not make it any less alive."},
+  {text:"A stick of butter",hint:"Butter is made from cream, which comes from cow's milk.",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Butter_two_pieces.jpg/640px-Butter_two_pieces.jpg",emoji:"🧈",exp:"Correct! Butter is made by processing cream (from a living cow) — churning it until the fat separates. That process makes it non-living."},
+  {text:"A moss-covered rock",hint:"The green fuzzy coating is the key — look closely at what is growing.",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Moss_on_rock.jpg/640px-Moss_on_rock.jpg",emoji:"🪨",exp:"Correct! The moss is living — it is a plant that grows, reproduces, and responds to moisture. The rock underneath is non-living, but the moss on top is alive!"},
+  {text:"A leather belt",hint:"Leather comes from animal hide. But what process was used to make this?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Leather_belt.jpg/640px-Leather_belt.jpg",emoji:"👜",exp:"Correct! Leather comes from animal hide (once living), but the tanning process transforms it into leather — changing its scientific category to non-living."},
+  {text:"A maple seed (samara) spinning down from a tree",hint:"It is whirling through the air right now. Could it become something more?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Maple_seeds.jpg/640px-Maple_seeds.jpg",emoji:"🍁",exp:"Correct! A maple seed (called a samara or helicopter seed) is living — it contains a plant embryo with the potential to germinate and grow into a full maple tree. Potential counts!"}
+];
 
-  let cur = 0, score = 0, answered = false;
+/* ═══════════════════════════════════════════════════
+   ROUND 2 DEBATE BANK — 40 questions
+═══════════════════════════════════════════════════ */
+const R2BANK = [
+  {text:"A wool sweater",q:"Wool comes from a living sheep that was sheared — not harmed. Is the sweater living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Baa_lamb.jpg/640px-Baa_lamb.jpg",emoji:"🧥",verdict:"Non-living — The wool was part of a living sheep, but it was processed (sheared, spun, knitted) into fabric. Processing changes its category to non-living."},
+  {text:"A caterpillar inside a chrysalis",q:"It is hanging from a branch, not moving, and looks like a dry shell. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Chrysalis.jpg/640px-Chrysalis.jpg",emoji:"🦋",verdict:"Living — The caterpillar is transforming into a butterfly. It is still using energy and developing. Not moving does not mean not alive!"},
+  {text:"A shark tooth on the beach",q:"Sharks shed thousands of teeth in their lifetime. The shark is still alive. Is the tooth living, dead, or non-living?",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Fossilized_shark_tooth.jpg/640px-Fossilized_shark_tooth.jpg",emoji:"🦷",verdict:"Dead (once living) — The tooth was a living part of a living shark. Once separated, it no longer carries out life processes."},
+  {text:"Coral in the ocean",q:"It looks like a colorful rock. It does not have legs or eyes and grows very slowly. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Coral_reef_at_palmyra.jpg/640px-Coral_reef_at_palmyra.jpg",emoji:"🪸",verdict:"Living — Coral is made of tiny living animals called polyps. It grows, reproduces, and uses energy. Looks can be very deceiving!"},
+  {text:"A glass of orange juice",q:"It was made by squeezing oranges that grew on a tree. Is the juice living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Oranges_and_orange_juice.jpg/640px-Oranges_and_orange_juice.jpg",emoji:"🍊",verdict:"Non-living — Oranges came from a living tree, but squeezing them into juice transforms the material. Processing changes its category to non-living."},
+  {text:"A raw egg from a grocery store",q:"It came from a chicken. Inside is a yolk and white. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Chicken_egg_2009.jpg/640px-Chicken_egg_2009.jpg",emoji:"🥚",verdict:"Living — An unfertilized egg is technically non-living, BUT a fertilized egg contains a living embryo. Most store eggs are unfertilized, which makes this a great debate question! Scientists classify unfertilized eggs as non-living."},
+  {text:"A piece of wood from a lumberyard",q:"It was cut from a tree. The tree is no longer alive. Is the wood living, dead, or non-living?",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Lumber_yard.jpg/640px-Lumber_yard.jpg",emoji:"🪵",verdict:"Dead (once living) — The lumber was cut from a living tree. It has not been processed into something new, so it stays in the dead category — once living."},
+  {text:"A bar of soap",q:"Many soaps contain animal fats or plant oils. Does that make soap living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Soap_bar.jpg/640px-Soap_bar.jpg",emoji:"🧼",verdict:"Non-living — Soap is made by processing animal fats or plant oils with lye through a chemical reaction called saponification. Processing transforms the material into something non-living."},
+  {text:"A dried starfish from a gift shop",q:"It was once alive in the ocean. Now it is dried, bleached, and for sale. Is it living, dead, or non-living?",answer:"dead",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Sea_star_on_rock.jpg/640px-Sea_star_on_rock.jpg",emoji:"⭐",verdict:"Dead (once living) — The dried starfish was once a living animal. It has not been significantly processed, so it is classified as dead — once living."},
+  {text:"A virus",q:"Viruses have DNA. They can reproduce — but only inside a living host. Are they living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/SARS-CoV-2_without_background.png/640px-SARS-CoV-2_without_background.png",emoji:"🦠",verdict:"Non-living — This is a real scientific debate! Most scientists classify viruses as non-living because they cannot carry out life processes on their own. They need a host cell to reproduce. Great scientists still argue about this one!"},
+  {text:"Bread dough rising in a bowl",q:"Bread rises because of yeast — a living fungus. Is the dough living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Bread_dough.jpg/640px-Bread_dough.jpg",emoji:"🍞",verdict:"Tricky! The dough itself is non-living, but the yeast inside it is living. The gas bubbles are produced by living yeast eating sugar and releasing CO2. The dough is a mixture — not alive on its own."},
+  {text:"A tornado funnel cloud",q:"A tornado moves, grows, changes shape, and eventually dies. Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Tornado0_-_NOAA.jpg/640px-Tornado0_-_NOAA.jpg",emoji:"🌪️",verdict:"Non-living — A tornado is a weather phenomenon made of moving air. It was never part of any organism and cannot reproduce or respond to stimuli the way living things do."},
+  {text:"A carved wooden statue",q:"It was carved from a tree. An artist shaped it into a figure. Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Wooden_statue.jpg/640px-Wooden_statue.jpg",emoji:"🗿",verdict:"Non-living — The wood came from a living tree, but the carving process transformed it into something new. Processing changes its category to non-living."},
+  {text:"A fire burning in a fireplace",q:"Fire grows, needs food (fuel), and produces waste (smoke). Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Campfire.jpg/640px-Campfire.jpg",emoji:"🔥",verdict:"Non-living — Fire is a chemical reaction, not an organism. It was never alive. It cannot reproduce or maintain homeostasis. Fire is non-living, even though it seems to behave like a living thing!"},
+  {text:"A spiderweb with dew drops",q:"A spider made this web. The spider is gone. Is the web living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Spiderweb_with_dew.jpg/640px-Spiderweb_with_dew.jpg",emoji:"🕸️",verdict:"Non-living — The web is made of silk protein secreted by a living spider, but silk is a processed biological material. The web itself is non-living — similar to how hair is non-living even though it came from a living body."},
+  {text:"A pond scum of algae",q:"Green algae covers the surface of a stagnant pond. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Algae_Bloom_on_Pond.jpg/640px-Algae_Bloom_on_Pond.jpg",emoji:"🟢",verdict:"Living — Algae are living organisms! They photosynthesize (make their own energy), grow, reproduce, and respond to light. Even though they look like green slime, they are very much alive."},
+  {text:"A canteen of river water",q:"River water contains microscopic organisms. But is the water itself living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Water_in_glass.jpg/640px-Water_in_glass.jpg",emoji:"💧",verdict:"Non-living — Water (H₂O) is a molecule. It was never alive. The microscopic organisms IN the water may be living, but water itself is non-living."},
+  {text:"A block of ice",q:"Ice is frozen water. It can melt and change form. Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Ice_block.jpg/640px-Ice_block.jpg",emoji:"🧊",verdict:"Non-living — Ice is simply frozen water. It was never part of a living organism and cannot grow or reproduce. It is non-living."},
+  {text:"A package of yeast from the grocery store",q:"Yeast is used to make bread rise. The package says it is dormant. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Yeast_pac.jpg/640px-Yeast_pac.jpg",emoji:"🍞",verdict:"Living — Yeast is a living fungus that has been dried into a dormant state. Add warm water and it will wake up, eat sugar, and produce CO2. It has the potential to carry out all life processes — it is living!"},
+  {text:"A crystal of quartz",q:"Quartz crystals grow in caves over thousands of years. Is quartz living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Quartz_banded.jpg/640px-Quartz_banded.jpg",emoji:"💎",verdict:"Non-living — Crystals grow through a chemical process, not biological growth. Quartz was never part of a living organism. The fact that it grows does not make it alive — growth must involve cells!"},
+  {text:"A cup of yogurt",q:"Yogurt is made from milk fermented by living bacteria. Is the yogurt living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Yog.jpg/640px-Yog.jpg",emoji:"🥛",verdict:"Tricky! The yogurt itself is non-living, but it contains living bacteria cultures. The mixture has been processed. Similar to bread dough, the yogurt base is non-living, but the bacteria in it are living organisms."},
+  {text:"A piece of amber with an insect inside",q:"Amber is fossilized tree sap. A prehistoric insect is trapped inside. Is the amber living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Amber_insect.jpg/640px-Amber_insect.jpg",emoji:"🟡",verdict:"Non-living — Amber is fossilized tree resin. The original living sap has been transformed over millions of years into a mineral-like substance. The trapped insect is dead. Both the amber and the insect are non-living or dead."},
+  {text:"A maple tree in winter with no leaves",q:"It has no leaves, no flowers, no fruit. It looks completely dead. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Maple_tree_in_winter.jpg/640px-Maple_tree_in_winter.jpg",emoji:"🌲",verdict:"Living — A deciduous tree in winter is dormant, not dead. It is still maintaining homeostasis, using stored energy, and will produce leaves and flowers again in spring."},
+  {text:"A piece of cork",q:"Cork is harvested from the bark of living cork oak trees. Is the cork stopper living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Cork_stopper.jpg/640px-Cork_stopper.jpg",emoji:"🍾",verdict:"Non-living — Cork comes from living tree bark, but it is cut, dried, and processed into stoppers. Processing changes its category to non-living."},
+  {text:"A river flowing over rocks",q:"A river moves, changes shape, and carves the land over time. Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Colorado_River_in_Grand_Canyon.jpg/640px-Colorado_River_in_Grand_Canyon.jpg",emoji:"🌊",verdict:"Non-living — A river is made of water and minerals. It was never alive. Movement alone does not make something living — living things must have cells, DNA, and carry out life processes."},
+  {text:"A block of cheese",q:"Cheese is made from milk (from a cow) and bacteria. Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Cheddar_cheese_slices.jpg/640px-Cheddar_cheese_slices.jpg",emoji:"🧀",verdict:"Non-living — Cheese is made by processing milk with bacteria and enzymes. The resulting product is non-living, even though it came from living sources."},
+  {text:"A tadpole swimming in a pond",q:"It has a tail and no legs yet. It breathes through gills. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Tadpole.jpg/640px-Tadpole.jpg",emoji:"🐸",verdict:"Living — A tadpole is a young frog. It breathes, moves, responds to its environment, uses energy, and is actively growing and developing into an adult frog."},
+  {text:"A silk scarf",q:"Silk is made from the cocoon threads of silkworms. Is the scarf living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Silk_scarf.jpg/640px-Silk_scarf.jpg",emoji:"🧣",verdict:"Non-living — Silk thread comes from silkworm cocoons (once living), but it is processed (unraveled, spun, woven) into fabric. Processing changes its category to non-living."},
+  {text:"A bacterium on a petri dish",q:"It is so small you cannot see it without a microscope. It only has one cell. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/E_coli_at_10000x%2C_original.jpg/640px-E_coli_at_10000x%2C_original.jpg",emoji:"🦠",verdict:"Living — A bacterium is a unicellular living organism. Even with just one cell, it carries out all life processes: it grows, responds to its environment, uses energy, and reproduces by splitting in two."},
+  {text:"A lump of beeswax",q:"Beeswax is secreted by honeybees to build their honeycomb. Is beeswax living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Beeswax_block.jpg/640px-Beeswax_block.jpg",emoji:"🐝",verdict:"Non-living — Beeswax is a secretion produced by living bees, but the wax itself is a processed biological substance. Like hair or silk, it is non-living material produced by a living organism."},
+  {text:"A sunflower seed",q:"It looks like a small striped shell. There is nothing visibly happening inside. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Sunflower_seeds.jpg/640px-Sunflower_seeds.jpg",emoji:"🌻",verdict:"Living — A sunflower seed contains a plant embryo with the potential to germinate and grow into a full sunflower plant. Potential counts as living!"},
+  {text:"A piece of chalk",q:"Chalk is made from the compressed shells of ancient microscopic sea organisms. Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Chalk_sticks.jpg/640px-Chalk_sticks.jpg",emoji:"✏️",verdict:"Non-living — Like coal and fossil, chalk forms over millions of years from ancient organic material. The original living material has been completely transformed through geological processes into calcium carbonate minerals."},
+  {text:"A rag made from old jeans",q:"Jeans are made from cotton, which comes from a cotton plant. Is the rag living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Cleaning_rag.jpg/640px-Cleaning_rag.jpg",emoji:"🧺",verdict:"Non-living — Cotton from a living plant was processed (harvested, spun, woven, dyed) into fabric and then cut into a rag. Multiple processing steps make it non-living."},
+  {text:"A pine cone on the forest floor",q:"It fell from a pine tree. Inside are seeds. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Pine_cone.jpg/640px-Pine_cone.jpg",emoji:"🌲",verdict:"Living — A pine cone contains seeds, and each seed has the potential to grow into a pine tree. The pine cone is classified as living because of that potential!"},
+  {text:"A diamond",q:"Diamonds form deep underground from carbon under extreme pressure. Is a diamond living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Diamond_and_graphite2.jpg/640px-Diamond_and_graphite2.jpg",emoji:"💎",verdict:"Non-living — Diamonds are pure carbon crystals formed by geological processes. Although carbon is the basis of all life, a diamond has never been alive. It is non-living."},
+  {text:"A pollen grain from a flower",q:"Pollen is released by flowers. A single grain is too small to see. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Misc_pollen.jpg/640px-Misc_pollen.jpg",emoji:"🌸",verdict:"Living — Pollen grains are living cells that carry the plant's genetic material. They have the potential to fertilize other plants and form seeds. Pollen is alive!"},
+  {text:"A soy candle",q:"Soy wax comes from soybeans (a plant). Is a soy candle living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Candle.jpg/640px-Candle.jpg",emoji:"🕯️",verdict:"Non-living — Soy wax comes from processed soybean oil (a living plant source), but chemical processing transforms it into a wax. Processing changes its category to non-living."},
+  {text:"A bowl of uncooked rice",q:"Rice grains are harvested from rice plants. Are they living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/White_rice.jpg/640px-White_rice.jpg",emoji:"🍚",verdict:"Living — Uncooked rice grains are seeds, and each seed has the potential to sprout and grow into a rice plant given the right conditions (water, warmth, soil). They are living!"},
+  {text:"A bowl of cooked rice",q:"The same rice, but now boiled in hot water for 20 minutes. Is it living, dead, or non-living?",answer:"nonliving",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/White_rice.jpg/640px-White_rice.jpg",emoji:"🍚",verdict:"Non-living — Cooking destroys the embryo inside the seed. The heat kills any potential for growth. Cooked rice can no longer germinate or carry out life processes — it is non-living. (Compare this to uncooked rice!)"},
+  {text:"A shark swimming in the ocean",q:"It moves fast, hunts, and has been around for 450 million years. Is it living, dead, or non-living?",answer:"living",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/White_shark.jpg/640px-White_shark.jpg",emoji:"🦈",verdict:"Living — A shark is very much alive! It breathes, responds to stimuli, uses energy, grows, maintains homeostasis, and reproduces. Sharks have survived five mass extinctions because they are incredibly well-adapted living organisms."}
+];
 
-  function buildPips() {
-    const row = document.getElementById('prow');
-    row.innerHTML = '';
-    for (let i = 0; i < Qs.length; i++) {
-      const p = document.createElement('div');
-      p.className = 'pip' + (i < cur ? ' done' : i === cur ? ' cur' : '');
-      row.appendChild(p);
-    }
-  }
+/* ═══════════════════════════════════════════════════
+   ROUND 3 CER QUESTION BANK — 15 prompts
+═══════════════════════════════════════════════════ */
+const R3BANK = [
+  {q:"A student finds a hard, brown object in the schoolyard. It has a rough shell on the outside and a soft white inside. It fell from the large oak tree nearby. Is this object living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Acorn_on_white_background.jpg/640px-Acorn_on_white_background.jpg",emoji:"🌰",hint:"An acorn is a seed. Does it have the potential to grow and reproduce? Hint: potential counts as living!"},
+  {q:"A student brings in a small round object from their backyard. It is white with a smooth surface, about the size of a ping pong ball. It came from a nest in their yard. Is this object living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Chicken_egg_2009.jpg/640px-Chicken_egg_2009.jpg",emoji:"🥚",hint:"Think about what could be inside this object and what it might become under the right conditions."},
+  {q:"During a nature walk, a student picks up a curled, brown, crunchy object from under a tree. It was once flat and green. Is it living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Autumn_leaf.jpg/640px-Autumn_leaf.jpg",emoji:"🍂",hint:"A fallen leaf was once attached to a living tree. Think about whether it is still carrying out any life processes now."},
+  {q:"A student finds a clump of green fuzzy material growing on the shady side of a rock in the schoolyard. It does not have roots, stems, or leaves. Is this object living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Moss_on_rock.jpg/640px-Moss_on_rock.jpg",emoji:"🪨",hint:"Think about what characteristics of living things apply here. Does it grow? Does it reproduce?"},
+  {q:"A student in art class is working with a piece of white material that feels smooth and heavy. The teacher says it comes from the tusks of an elephant that died long ago. Is this material living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Elephant_tusk_ivory.jpg/640px-Elephant_tusk_ivory.jpg",emoji:"🐘",hint:"The key question: was it ever alive or part of something alive? Has it been processed into something new?"},
+  {q:"A student's grandmother makes homemade wine from grapes. The student brings in a small sealed jar of the grape juice before the fermentation process starts. Is the grape juice living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Grape_juice.jpg/640px-Grape_juice.jpg",emoji:"🍇",hint:"Grapes grow on living vines. But what happens when you crush them into juice? Think about the process rule."},
+  {q:"A class is studying soil. One student notices tiny reddish-brown worms wriggling when they dig up a cup of dirt. Another student notices some thin white threads that look like roots but are not attached to any plant. Are the worms living, dead, or non-living? What about the white threads?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Earthworms.jpg/640px-Earthworms.jpg",emoji:"🪱",hint:"This question has two parts. Think about each one separately using the characteristics of living things."},
+  {q:"A student finds a piece of smooth, glassy black rock near a volcano on a field trip. The teacher says it formed when lava cooled rapidly. Is this rock living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Obsidian.jpg/640px-Obsidian.jpg",emoji:"🪨",hint:"Think about where this rock came from. Was it ever alive? Was it ever part of a living organism?"},
+  {q:"A student receives a packet of bean seeds to plant at home. The seeds are dry, hard, and show no signs of growing. Is the packet of bean seeds living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Bean_seeds.jpg/640px-Bean_seeds.jpg",emoji:"🌱",hint:"Seeds look lifeless, but remember the key word: potential. What could these seeds become under the right conditions?"},
+  {q:"A student finds a gray, rubbery piece of material on the sidewalk near the school's art room. The teacher says it is a used rubber eraser made from synthetic rubber. Is the eraser living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Eraser.jpg/640px-Eraser.jpg",emoji:"✏️",hint:"Synthetic rubber is made from petroleum chemicals in a factory. Think about whether petroleum was ever alive, and what process made the eraser."},
+  {q:"While cleaning a fish tank, a student scrapes off a greenish-brown coating from the glass. Under a microscope, it looks like thousands of tiny dots. The teacher says it is biofilm made of bacteria and algae. Is it living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/E_coli_at_10000x%2C_original.jpg/640px-E_coli_at_10000x%2C_original.jpg",emoji:"🦠",hint:"Even if you cannot see them with your eyes, bacteria and algae are organisms. Think about the characteristics of living things — even microscopic ones."},
+  {q:"A student finds a large, flat, spiral-shaped object in a pile of rocks at a construction site. The teacher says it is a 200-million-year-old ammonite — an ancient sea creature now turned to stone. Is it living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Ammonite_Asteroceras.jpg/640px-Ammonite_Asteroceras.jpg",emoji:"🐚",hint:"This is similar to the dinosaur bone question. Think about what happened to the original material over 200 million years."},
+  {q:"A student buys a bonsai tree from a nursery. It is tiny — only six inches tall — and has been kept small through special pruning techniques for over 20 years. Is it living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Bonsai_79.jpg/640px-Bonsai_79.jpg",emoji:"🌳",hint:"Being small does not mean not alive. Think about what life processes a tree carries out, even a tiny one."},
+  {q:"A student finds a small orange mushroom growing out of a pile of dead wood chips in the school garden. The mushroom appeared overnight. Is it living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Mushroom_On_A_Log.jpg/640px-Mushroom_On_A_Log.jpg",emoji:"🍄",hint:"Mushrooms are the fruiting bodies of fungi. Think about the characteristics of living things — fungi are a whole separate kingdom of life!"},
+  {q:"A scientist discovers a tiny organism deep in a glacier that has been frozen for 50,000 years. When thawed in the lab, it starts moving and reproducing. Is this organism living, dead, or non-living? How do you know?",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Ice_block.jpg/640px-Ice_block.jpg",emoji:"🧊",hint:"This is an extreme case of dormancy. Think about the concept of potential — and what this organism can do once conditions are right."}
+];
 
-  function loadQ() {
-    if (cur >= Qs.length) { showFinal(); return; }
-    const q = Qs[cur];
-    answered = false;
+/* ═══════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════ */
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function pick(arr,n){return shuffle(arr).slice(0,n);}
 
-    const wrap = document.getElementById('qimgwrap');
-    wrap.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = q.img;
-    img.alt = q.text;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:10px';
-    img.onerror = function() {
-      wrap.innerHTML = '<span class="emoji-fb">' + q.emoji + '</span>';
-    };
-    wrap.appendChild(img);
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let r1Questions=[],r1cur=0,r1score=0,r1answered=false;
+let r2Questions=[],r2cur=0,r2p1=0,r2p2=0,r2answered=false;
+let r3Question=null;
+let cerEmoji='🌰';
 
-    document.getElementById('qt').textContent = q.text;
-    document.getElementById('qh').textContent = q.hint;
-    document.getElementById('fbx').className = 'fb';
-    document.getElementById('nxtb').className = 'nxt';
-    ['bl','bd','bn'].forEach(function(id) {
-      const b = document.getElementById(id);
-      b.className = 'cb';
-      b.disabled = false;
-    });
-    document.getElementById('tot').textContent = Qs.length;
-    document.getElementById('sc').textContent = score;
-    buildPips();
-  }
-
-  function ans(choice) {
-    if (answered) return;
-    answered = true;
-    const q = Qs[cur];
-    const ok = (choice === q.answer);
-    if (ok) score++;
-
-    const map = { living: 'bl', dead: 'bd', nonliving: 'bn' };
-    document.getElementById(map[choice]).className = 'cb ' + (ok ? 'correct' : 'wrong');
-    if (!ok) document.getElementById(map[q.answer]).className = 'cb correct';
-    ['bl','bd','bn'].forEach(function(id) { document.getElementById(id).disabled = true; });
-
-    const fb = document.getElementById('fbx');
-    fb.className = 'fb show ' + (ok ? 'correct' : 'wrong');
-    fb.textContent = ok ? q.explanation : 'Not quite. ' + q.explanation;
-
-    document.getElementById('nxtb').className = 'nxt show';
-    document.getElementById('sc').textContent = score;
-  }
-
-  function nextQ() { cur++; loadQ(); }
-
-  function goTab(tab) {
-    ['r1','r2','r3','rfin'].forEach(function(t) {
-      document.getElementById(t).classList.add('hidden');
-    });
-    document.getElementById(tab).classList.remove('hidden');
-    document.querySelectorAll('.tb').forEach(function(b, i) {
-      b.classList.toggle('active', ['r1','r2','r3'][i] === tab);
-    });
-    if (tab === 'r1') loadQ();
-  }
-
-  function rv(id) {
-    document.getElementById(id).classList.add('show');
-  }
-
-  function submitCER() {
-    const claim    = document.getElementById('cc').value.trim();
-    const evidence = document.getElementById('ce').value.trim();
-    const reasoning = document.getElementById('crr').value.trim();
-    const note = document.getElementById('cernote');
-
-    if (!claim && !evidence && !reasoning) {
-      note.className = 'cer-note show';
-      note.innerHTML = '<strong>Reminder:</strong> Fill in your Claim, Evidence, and Reasoning before submitting. Each partner should contribute at least one idea!';
-      return;
-    }
-
-    note.className = 'cer-note show';
-    note.innerHTML =
-      '<strong>Great work submitting your CER!</strong><br><br>' +
-      'Check your thinking against these questions:<br>' +
-      '&bull; Did you clearly state if the object is <em>living</em>, <em>dead</em>, or <em>non-living</em>?<br>' +
-      '&bull; Did you use at least one characteristic of living things as evidence?<br>' +
-      '&bull; Did your reasoning explain <em>why</em> the evidence supports your claim?<br><br>' +
-      '<strong>Hint:</strong> An acorn is a seed. Does it have the <em>potential</em> to grow and reproduce?';
-  }
-
-  function showFinal() {
-    document.querySelectorAll('.tb').forEach(function(b) { b.style.display = 'none'; });
-    ['r1','r2','r3'].forEach(function(t) { document.getElementById(t).classList.add('hidden'); });
-    document.getElementById('rfin').classList.remove('hidden');
-
-    const pct = score / Qs.length;
-    const stars = pct >= 0.875 ? '★★★' : pct >= 0.625 ? '★★☆' : '★☆☆';
-    const labels = {
-      '★★★': 'Outstanding — you two are real scientists!',
-      '★★☆': 'Strong work — review a couple and try again!',
-      '★☆☆': 'Good effort — re-read your notes and go again!'
-    };
-    document.getElementById('starr').textContent  = stars;
-    document.getElementById('fscore').textContent = score + ' / ' + Qs.length;
-    document.getElementById('flbl').textContent   = labels[stars];
-  }
-
-  function restart() {
-    cur = 0; score = 0;
-    document.querySelectorAll('.tb').forEach(function(b) { b.style.display = ''; });
-    document.getElementById('cernote').className = 'cer-note';
-    ['cc','ce','crr'].forEach(function(id) { document.getElementById(id).value = ''; });
-    goTab('r1');
-  }
-
+/* ═══════════════════════════════════════════════════
+   ROUND 1
+═══════════════════════════════════════════════════ */
+function initR1(){
+  r1Questions=pick(BANK,8);
+  r1cur=0;r1score=0;r1answered=false;
   loadQ();
+}
+
+function buildPips(){
+  const row=document.getElementById('prow');
+  row.innerHTML='';
+  for(let i=0;i<r1Questions.length;i++){
+    const p=document.createElement('div');
+    p.className='pip'+(i<r1cur?' done':i===r1cur?' cur':'');
+    row.appendChild(p);
+  }
+}
+
+function loadQ(){
+  if(r1cur>=r1Questions.length){showFinal();return;}
+  const q=r1Questions[r1cur];
+  r1answered=false;
+  const wrap=document.getElementById('qimgwrap');
+  wrap.innerHTML='';
+  const img=document.createElement('img');
+  img.src=q.img;img.alt=q.text;
+  img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px';
+  img.onerror=function(){wrap.innerHTML='<span class="efb">'+q.emoji+'</span>';};
+  wrap.appendChild(img);
+  document.getElementById('qt').textContent=q.text;
+  document.getElementById('qh').textContent=q.hint;
+  document.getElementById('fbx').className='fb';
+  document.getElementById('nxtb').className='nxt';
+  ['bl','bd','bn'].forEach(function(id){const b=document.getElementById(id);b.className='cb';b.disabled=false;});
+  document.getElementById('tot').textContent=r1Questions.length;
+  document.getElementById('sc').textContent=r1score;
+  buildPips();
+}
+
+function ans(choice){
+  if(r1answered)return;
+  r1answered=true;
+  const q=r1Questions[r1cur];
+  const ok=(choice===q.answer);
+  if(ok)r1score++;
+  const map={living:'bl',dead:'bd',nonliving:'bn'};
+  document.getElementById(map[choice]).className='cb '+(ok?'correct':'wrong');
+  if(!ok)document.getElementById(map[q.answer]).className='cb correct';
+  ['bl','bd','bn'].forEach(function(id){document.getElementById(id).disabled=true;});
+  const fb=document.getElementById('fbx');
+  fb.className='fb show '+(ok?'correct':'wrong');
+  fb.textContent=ok?q.exp:'Not quite. '+q.exp;
+  document.getElementById('nxtb').className='nxt show';
+  document.getElementById('sc').textContent=r1score;
+}
+
+function nextQ(){r1cur++;loadQ();}
+
+function showFinal(){
+  document.querySelectorAll('.tb').forEach(function(b){b.style.display='none';});
+  ['r1','r2','r3'].forEach(function(t){document.getElementById(t).classList.add('hidden');});
+  document.getElementById('rfin').classList.remove('hidden');
+  const pct=r1score/r1Questions.length;
+  const s=pct>=0.875?'★★★':pct>=0.625?'★★☆':'★☆☆';
+  const lbl={'★★★':'Outstanding — you two are real scientists!','★★☆':'Strong work — review a couple and try again!','★☆☆':'Good effort — re-read your notes and go again!'};
+  document.getElementById('starr').textContent=s;
+  document.getElementById('fscore').textContent=r1score+' / '+r1Questions.length;
+  document.getElementById('flbl').textContent=lbl[s];
+}
+
+/* ═══════════════════════════════════════════════════
+   ROUND 2
+═══════════════════════════════════════════════════ */
+function initR2(){
+  r2Questions=pick(R2BANK,8);
+  r2cur=0;r2p1=0;r2p2=0;r2answered=false;
+  document.getElementById('p1pts').textContent='0';
+  document.getElementById('p2pts').textContent='0';
+  document.getElementById('r2winner').className='r2-winner';
+  updateLeader();
+  renderR2();
+}
+
+function updateLeader(){
+  const p1c=document.getElementById('p1card');
+  const p2c=document.getElementById('p2card');
+  p1c.classList.toggle('leader',r2p1>r2p2);
+  p2c.classList.toggle('leader',r2p2>r2p1);
+}
+
+function renderR2(){
+  const area=document.getElementById('r2area');
+  if(r2cur>=r2Questions.length){
+    area.innerHTML='';
+    showR2Winner();
+    return;
+  }
+  const q=r2Questions[r2cur];
+  document.getElementById('r2qcount').textContent='Question '+(r2cur+1)+' of '+r2Questions.length;
+  area.innerHTML='';
+  const card=document.createElement('div');
+  card.className='dcard';
+
+  const dimgDiv=document.createElement('div');
+  dimgDiv.className='dimg';
+  const img=document.createElement('img');
+  img.alt=q.text;
+  img.onerror=function(){dimgDiv.innerHTML='<span style="font-size:52px">'+q.emoji+'</span>';};
+  img.src=q.img;
+  dimgDiv.appendChild(img);
+  card.appendChild(dimgDiv);
+
+  const h3=document.createElement('h3');h3.textContent=q.text;card.appendChild(h3);
+  const p=document.createElement('p');p.className='dq';p.textContent=q.question||q.q;card.appendChild(p);
+
+  const btnGrid=document.createElement('div');btnGrid.className='r2-btns';
+  const opts=[{label:'Living',val:'living'},{label:'Dead (once living)',val:'dead'},{label:'Non-living',val:'nonliving'}];
+  opts.forEach(function(o){
+    const b=document.createElement('button');
+    b.className='r2-btn';b.textContent=o.label;
+    b.onclick=function(){r2ans(o.val,card,q);};
+    btnGrid.appendChild(b);
+  });
+  card.appendChild(btnGrid);
+
+  const rev=document.createElement('div');
+  rev.className='r2-reveal '+q.answer;
+  rev.id='r2rev';
+  rev.innerHTML='<strong>'+capFirst(q.answer.replace('nonliving','non-living'))+'</strong> — '+q.verdict;
+  card.appendChild(rev);
+
+  const nxt=document.createElement('button');
+  nxt.className='r2-next';nxt.id='r2nxt';nxt.textContent='Next Question →';
+  nxt.onclick=function(){r2cur++;r2answered=false;renderR2();};
+  card.appendChild(nxt);
+
+  area.appendChild(card);
+}
+
+function r2ans(choice,card,q){
+  if(r2answered)return;
+  r2answered=true;
+  const ok=(choice===q.answer);
+  const map={living:0,dead:1,nonliving:2};
+  const btns=card.querySelectorAll('.r2-btn');
+  btns.forEach(function(b,i){
+    const vals=['living','dead','nonliving'];
+    if(vals[i]===choice)b.className='r2-btn '+(ok?'correct':'wrong');
+    if(!ok&&vals[i]===q.answer)b.className='r2-btn correct';
+    b.disabled=true;
+  });
+
+  if(ok){
+    if(r2p1<=r2p2){r2p1++;document.getElementById('p1pts').textContent=r2p1;}
+    else{r2p2++;document.getElementById('p2pts').textContent=r2p2;}
+  } else {
+    if(r2p1>r2p2){r2p2++;document.getElementById('p2pts').textContent=r2p2;}
+    else{r2p1++;document.getElementById('p1pts').textContent=r2p1;}
+  }
+  updateLeader();
+
+  document.getElementById('r2rev').classList.add('show');
+  document.getElementById('r2nxt').classList.add('show');
+}
+
+function showR2Winner(){
+  const w=document.getElementById('r2winner');
+  const wt=document.getElementById('r2winnertext');
+  const wp=document.getElementById('r2winnerpts');
+  w.className='r2-winner show';
+  if(r2p1>r2p2){wt.textContent='Player 1 wins this round!';wp.textContent=r2p1+' pts vs '+r2p2+' pts — great competition!';}
+  else if(r2p2>r2p1){wt.textContent='Player 2 wins this round!';wp.textContent=r2p2+' pts vs '+r2p1+' pts — great competition!';}
+  else{wt.textContent="It's a tie!";wp.textContent=r2p1+' pts each — well matched scientists!';}
+  document.getElementById('r2qcount').textContent='Round 2 complete!';
+}
+
+function capFirst(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+/* ═══════════════════════════════════════════════════
+   ROUND 3
+═══════════════════════════════════════════════════ */
+function initR3(){
+  r3Question=pick(R3BANK,1)[0];
+  cerEmoji=r3Question.emoji;
+  document.getElementById('cerq').textContent=r3Question.q;
+  const ci=document.getElementById('cerimg');
+  ci.src=r3Question.img;
+  ci.onerror=function(){ci.parentNode.innerHTML='<span style="font-size:72px">'+r3Question.emoji+'</span>';};
+  ['cc','ce','crr'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('cernote').className='cer-note';
+}
+
+function submitCER(){
+  const claim=document.getElementById('cc').value.trim();
+  const evidence=document.getElementById('ce').value.trim();
+  const reasoning=document.getElementById('crr').value.trim();
+  const note=document.getElementById('cernote');
+  if(!claim&&!evidence&&!reasoning){
+    note.className='cer-note show';
+    note.innerHTML='<strong>Reminder:</strong> Fill in your Claim, Evidence, and Reasoning before checking. Each partner should contribute at least one idea!';
+    return;
+  }
+  note.className='cer-note show';
+  note.innerHTML=
+    '<strong>Good work submitting your CER!</strong><br><br>'+
+    'Check your thinking against these questions:<br>'+
+    '&bull; Did you clearly state if the object is <em>living</em>, <em>dead</em>, or <em>non-living</em>?<br>'+
+    '&bull; Did you use at least one characteristic of living things as evidence?<br>'+
+    '&bull; Did your reasoning explain <em>why</em> the evidence supports your claim?<br><br>'+
+    '<strong>Hint:</strong> '+r3Question.hint;
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB NAVIGATION
+═══════════════════════════════════════════════════ */
+function goTab(tab){
+  ['r1','r2','r3','rfin'].forEach(function(t){document.getElementById(t).classList.add('hidden');});
+  document.getElementById(tab).classList.remove('hidden');
+  document.querySelectorAll('.tb').forEach(function(b,i){
+    b.classList.toggle('active',['r1','r2','r3'][i]===tab);
+  });
+  if(tab==='r1')initR1();
+  if(tab==='r2')initR2();
+  if(tab==='r3')initR3();
+}
+
+/* ═══════════════════════════════════════════════════
+   RESTART
+═══════════════════════════════════════════════════ */
+function restart(){
+  document.querySelectorAll('.tb').forEach(function(b){b.style.display='';});
+  document.getElementById('rfin').classList.add('hidden');
+  goTab('r1');
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+initR1();
 </script>
 </body>
 </html>
