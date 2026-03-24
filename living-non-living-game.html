@@ -680,4 +680,15 @@ function restartAll(){
   r2p1=0;r2p2=0;r1p1=0;r1p2=0;
   ['fp1card','fp2card'].forEach(function(id){document.getElementById(id).classList.remove('champ');});
   ['fp1total','fp2total'].forEach(function(id){document.getElementById(id).classList.remove('champ-pts');});
-  document.querySelectorAll('.tb').forEach(function(b)
+  document.querySelectorAll('.tb').forEach(function(b){b.style.display='';b.classList.remove('done-tab');});
+  document.getElementById('rfin').classList.add('hidden');
+  updateScoreboard();
+  goTab('r1');
+}
+
+/* INIT */
+updateScoreboard();
+goTab('r1');
+</script>
+</body>
+</html>
