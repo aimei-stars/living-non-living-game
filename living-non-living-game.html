@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Living, Dead, or Non-Living? — 6th Grade Science Game</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .hdr {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .hdr h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .hdr p {
+      font-size: 15px;
+      color: #666;
+    }
+
+    /* ── Score bar ── */
+    .sbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 10px 18px;
+      margin-bottom: 1.25rem;
+      font-size: 14px;
+      color: #555;
+    }
+    .sbar .score-val {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+    .tb {
+      flex: 1;
+      padding: 10px 6px;
+      cursor: pointer;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .tb:hover { border-color: #bbb; color: #555; }
+    .tb.active {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
+
+    /* ── Progress pips ── */
+    .plabel {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .prow {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 1.25rem;
+    }
+    .pip {
+      flex: 1;
+      height: 5px;
+      border-radius: 99px;
+      background: #e0e0e0;
+    }
+    .pip.done { background: #3b6d11; }
+    .pip.cur  { background: #ba7517; }
+
+    /* ── Question card ── */
+    .qcard {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Image area ── */
+    .img-wrap {
+      width: 100%;
+      height: 220px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1.1rem;
+      background: #f0f0ec;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .emoji-fb { font-size: 80px; line-height: 1; }
+
+    /* ── Question text ── */
+    .qtext {
+      font-size: 19px;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .qhint {
+      font-size: 14px;
+      color: #777;
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 1.3rem;
+      line-height: 1.5;
+    }
+
+    /* ── Choice buttons ── */
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+    .cb {
+      background: #f5f5f0;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      padding: 14px 8px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      font-family: inherit;
+      transition: background 0.12s, border-color 0.12s;
+      line-height: 1.4;
+    }
+    .cb:hover:not(:disabled) { background: #ebebeb; border-color: #bbb; }
+    .cb.correct { background: #eaf3de; border-color: #639922; color: #3b6d11; }
+    .cb.wrong   { background: #fcebeb; border-color: #a32d2d; color: #791f1f; }
+    .cb:disabled { cursor: default; }
+
+    /* ── Feedback box ── */
+    .fb {
+      display: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 1rem;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .fb.show   { display: block; }
+    .fb.correct { background: #eaf3de; color: #3b6d11; border: 1px solid #97c459; }
+    .fb.wrong   { background: #fcebeb; color: #791f1f; border: 1px solid #f09595; }
+
+    /* ── Next button ── */
+    .nxt {
+      display: none;
+      width: 100%;
+      margin-top: 12px;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .nxt:hover { background: #333; }
+    .nxt.show { display: block; }
+
+    /* ── Debate cards ── */
+    .dcard {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 12px;
+    }
+    .dimg {
+      width: 100%;
+      height: 170px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      background: #f0f0ec;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dimg img { width: 100%; height: 100%; object-fit: cover; }
+    .dcard h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 5px;
+    }
+    .dcard p {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+      line-height: 1.55;
+    }
+    .rvl {
+      background: #f5f5f0;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .rvl:hover { background: #ebebeb; }
+    .vdict {
+      display: none;
+      margin-top: 10px;
+      font-size: 13px;
+      padding: 10px 13px;
+      border-radius: 9px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+    .vdict.show    { display: block; }
+    .vdict.living  { background: #eaf3de; color: #3b6d11; border: 1px solid #97c459; }
+    .vdict.dead    { background: #faeeda; color: #633806; border: 1px solid #ef9f27; }
+    .vdict.nonliving { background: #e6f1fb; color: #0c447c; border: 1px solid #85b7eb; }
+
+    /* ── CER card ── */
+    .cercard {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .cercard .cq {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    .cercard .csub {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 1.1rem;
+      line-height: 1.5;
+    }
+    .cerimg {
+      width: 100%;
+      height: 190px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1.1rem;
+      background: #f0f0ec;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cerimg img { width: 100%; height: 100%; object-fit: cover; }
+    .clabel {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .cercard textarea {
+      width: 100%;
+      border: 1.5px solid #ddd;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 82px;
+      background: #fafaf8;
+      color: #1a1a1a;
+      font-family: inherit;
+      margin-bottom: 12px;
+      transition: border-color 0.12s;
+    }
+    .cercard textarea:focus { outline: none; border-color: #888; }
+    .subcer {
+      background: #1a1a1a;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .subcer:hover { background: #333; }
+
+    /* ── CER note (shown after submit) ── */
+    .cer-note {
+      display: none;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #555;
+      background: #f5f5f0;
+      border: 1px solid #ddd;
+      border-radius: 9px;
+      padding: 10px 13px;
+      line-height: 1.6;
+    }
+    .cer-note.show { display: block; }
+
+    /* ── Final card ── */
+    .fincard {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+    .fin-stars   { font-size: 36px; margin-bottom: 10px; }
+    .fin-score   { font-size: 42px; font-weight: 800; color: #1a1a1a; }
+    .fin-lbl     { font-size: 15px; color: #666; margin: 6px 0 1.75rem; }
+    .restart {
+      background: #1a1a1a;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 32px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .restart:hover { background: #333; }
+
+    /* ── Category legend ── */
+    .legend {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .leg-pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+    }
+    .leg-pill.living    { background: #eaf3de; color: #3b6d11; }
+    .leg-pill.dead      { background: #faeeda; color: #633806; }
+    .leg-pill.nonliving { background: #e6f1fb; color: #0c447c; }
+
+    .hidden { display: none !important; }
+
+    /* ── Responsive ── */
+    @media (max-width: 420px) {
+      .choices { grid-template-columns: 1fr; }
+      .tabs { flex-direction: column; }
+      .hdr h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hdr">
+    <h1>Living, Dead, or Non-Living?</h1>
+    <p>Look at each image, then decide with your partner!</p>
+  </div>
+
+  <div class="sbar">
+    <div>Partner challenge &mdash; discuss before every answer</div>
+    <div>Score: <span class="score-val" id="sc">0</span> / <span class="score-val" id="tot">8</span></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tb active" onclick="goTab('r1')">Round 1: Classify It</button>
+    <button class="tb"        onclick="goTab('r2')">Round 2: Debate It</button>
+    <button class="tb"        onclick="goTab('r3')">Round 3: Defend It</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 1 — CLASSIFY IT
+  ══════════════════════════════════════ -->
+  <div id="r1">
+    <div class="plabel">Round 1 &mdash; Look at the image, then classify</div>
+    <div class="legend">
+      <span class="leg-pill living">Living</span>
+      <span class="leg-pill dead">Dead (once living)</span>
+      <span class="leg-pill nonliving">Non-living</span>
+    </div>
+    <div class="prow" id="prow"></div>
+    <div class="qcard">
+      <div class="img-wrap" id="qimgwrap"></div>
+      <div class="qtext" id="qt"></div>
+      <div class="qhint" id="qh"></div>
+      <div class="choices">
+        <button class="cb" id="bl" onclick="ans('living')">Living</button>
+        <button class="cb" id="bd" onclick="ans('dead')">Dead<br>(once living)</button>
+        <button class="cb" id="bn" onclick="ans('nonliving')">Non-living</button>
+      </div>
+      <div class="fb" id="fbx"></div>
+      <button class="nxt" id="nxtb" onclick="nextQ()">Next Question &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 2 — DEBATE IT
+  ══════════════════════════════════════ -->
+  <div id="r2" class="hidden">
+    <div class="plabel">Round 2 &mdash; Look at the image, debate with your partner, then reveal</div>
+
+    <div class="dcard">
+      <div class="dimg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Baa_lamb.jpg/640px-Baa_lamb.jpg"
+             alt="sheep being sheared"
+             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🧥</span>'" />
+      </div>
+      <h3>A wool sweater</h3>
+      <p>Wool comes from a living sheep. The sheep is sheared &mdash; not harmed. Is the sweater living, dead, or non-living?</p>
+      <button class="rvl" onclick="rv('d1')">Reveal Answer</button>
+      <div class="vdict nonliving" id="d1">
+        <strong>Non-living</strong> &mdash; The wool was part of a living sheep, but it was processed (sheared, spun, and knitted into fabric). That process changes its category to non-living.
+      </div>
+    </div>
+
+    <div class="dcard">
+      <div class="dimg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Chrysalis.jpg/640px-Chrysalis.jpg"
+             alt="chrysalis on a branch"
+             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🦋</span>'" />
+      </div>
+      <h3>A caterpillar inside a chrysalis</h3>
+      <p>It is hanging from a branch. It is not moving. It looks like a dry shell. Is it living, dead, or non-living?</p>
+      <button class="rvl" onclick="rv('d2')">Reveal Answer</button>
+      <div class="vdict living" id="d2">
+        <strong>Living</strong> &mdash; Inside the chrysalis, the caterpillar is transforming into a butterfly. It is still using energy and developing. Not moving does not mean not alive!
+      </div>
+    </div>
+
+    <div class="dcard">
+      <div class="dimg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Fossilized_shark_tooth.jpg/640px-Fossilized_shark_tooth.jpg"
+             alt="shark tooth on sand"
+             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🦷</span>'" />
+      </div>
+      <h3>A shark tooth on the beach</h3>
+      <p>Sharks naturally shed thousands of teeth in their lifetime. The shark is still alive somewhere in the ocean. Is the tooth living, dead, or non-living?</p>
+      <button class="rvl" onclick="rv('d3')">Reveal Answer</button>
+      <div class="vdict dead" id="d3">
+        <strong>Dead (once living)</strong> &mdash; The tooth was a living part of a living shark. Once separated from the body, it no longer carries out life processes. It is classified as dead &mdash; once living.
+      </div>
+    </div>
+
+    <div class="dcard">
+      <div class="dimg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Coral_reef_at_palmyra.jpg/640px-Coral_reef_at_palmyra.jpg"
+             alt="colorful coral reef underwater"
+             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🪸</span>'" />
+      </div>
+      <h3>Coral in the ocean</h3>
+      <p>It looks like a colorful rock on the ocean floor. It does not have legs or eyes. It grows very, very slowly. Is it living, dead, or non-living?</p>
+      <button class="rvl" onclick="rv('d4')">Reveal Answer</button>
+      <div class="vdict living" id="d4">
+        <strong>Living</strong> &mdash; Coral is made up of tiny living animals called polyps. It grows, reproduces, responds to its environment, and uses energy. Looks can be deceiving!
+      </div>
+    </div>
+
+    <div class="dcard">
+      <div class="dimg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Oranges_and_orange_juice.jpg/640px-Oranges_and_orange_juice.jpg"
+             alt="glass of orange juice next to oranges"
+             onerror="this.parentNode.innerHTML='<span style=font-size:52px>🍊</span>'" />
+      </div>
+      <h3>A glass of orange juice</h3>
+      <p>It was made by squeezing oranges that grew on a tree. Is the orange juice living, dead, or non-living?</p>
+      <button class="rvl" onclick="rv('d5')">Reveal Answer</button>
+      <div class="vdict nonliving" id="d5">
+        <strong>Non-living</strong> &mdash; Oranges came from a living tree, but squeezing them into juice transforms the material into something new. The juice is now non-living.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 3 — DEFEND IT (CER)
+  ══════════════════════════════════════ -->
+  <div id="r3" class="hidden">
+    <div class="plabel">Round 3 &mdash; Look at the image and write a CER together</div>
+    <div class="cercard">
+      <div class="cerimg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Acorn_on_white_background.jpg/640px-Acorn_on_white_background.jpg"
+             alt="an acorn on a white background"
+             onerror="this.parentNode.innerHTML='<span style=font-size:72px>🌰</span>'" />
+      </div>
+      <p class="cq">A student finds a hard, brown object in the schoolyard. It has a rough shell on the outside and a soft white inside. It fell from the large oak tree nearby. Is this object living, dead, or non-living? How do you know?</p>
+      <p class="csub">Use evidence from the characteristics of living things to support your answer.</p>
+
+      <div class="clabel">Claim &mdash; What category is it?</div>
+      <textarea id="cc" placeholder="The object is _______ because..."></textarea>
+
+      <div class="clabel">Evidence &mdash; What facts support your claim?</div>
+      <textarea id="ce" placeholder="We know this because..."></textarea>
+
+      <div class="clabel">Reasoning &mdash; How does your evidence connect to science?</div>
+      <textarea id="crr" placeholder="This connects to the characteristic of... which means..."></textarea>
+
+      <button class="subcer" onclick="submitCER()">Check Our Thinking</button>
+      <div class="cer-note" id="cernote"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       FINAL SCREEN
+  ══════════════════════════════════════ -->
+  <div id="rfin" class="hidden">
+    <div class="fincard">
+      <div class="fin-stars" id="starr"></div>
+      <div class="fin-score"  id="fscore"></div>
+      <div class="fin-lbl"    id="flbl"></div>
+      <button class="restart" onclick="restart()">Play Again</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  const Qs = [
+    {
+      text: "A honeybee flying between flowers",
+      hint: "What life processes is it doing right now?",
+      answer: "living",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Apis_mellifera_flying.jpg/640px-Apis_mellifera_flying.jpg",
+      emoji: "🐝",
+      explanation: "Correct! The honeybee is living. It moves, responds to its environment, uses energy, and can reproduce. It shows many characteristics of living things."
+    },
+    {
+      text: "A shed snake skin on the ground",
+      hint: "The snake that shed this is still alive somewhere nearby.",
+      answer: "dead",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Snake_shedding.jpg/640px-Snake_shedding.jpg",
+      emoji: "🐍",
+      explanation: "Correct! The shed skin was a living part of a living snake. Once separated from the snake's body, it is classified as dead — once living."
+    },
+    {
+      text: "A glass marble",
+      hint: "Was this object ever part of any living organism?",
+      answer: "nonliving",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Marble_collection.jpg/640px-Marble_collection.jpg",
+      emoji: "🔵",
+      explanation: "Correct! A glass marble is made from sand and minerals that were never alive. It has no potential to grow or reproduce. It is non-living."
+    },
+    {
+      text: "An empty bird's nest on the ground",
+      hint: "Birds built this from twigs and dried grass. Where did those materials come from?",
+      answer: "dead",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Bird_nest_without_bird.jpg/640px-Bird_nest_without_bird.jpg",
+      emoji: "🪹",
+      explanation: "Correct! The nest is made of twigs and dried grass that were once part of living plants. The nest is classified as dead — once living."
+    },
+    {
+      text: "A spider spinning a web",
+      hint: "The web is not alive — but what about the spider making it?",
+      answer: "living",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Garden_spider_spinning_web.jpg/640px-Garden_spider_spinning_web.jpg",
+      emoji: "🕷️",
+      explanation: "Correct! The spider is living. It responds to stimuli, uses energy, grows, and reproduces. The web it spins is non-living, but the spider itself is very much alive."
+    },
+    {
+      text: "A rubber car tire",
+      hint: "Natural rubber comes from rubber trees. But what happened to it after?",
+      answer: "nonliving",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Worn_tire.jpg/640px-Worn_tire.jpg",
+      emoji: "⚫",
+      explanation: "Correct! Natural rubber comes from living trees, but it was heavily processed and manufactured into a tire. That process changes its category to non-living."
+    },
+    {
+      text: "A bear in deep winter hibernation",
+      hint: "It is barely breathing and not moving at all. Does that mean it is not alive?",
+      answer: "living",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Ours_brun_parcanimalierpyrenees_1.jpg/640px-Ours_brun_parcanimalierpyrenees_1.jpg",
+      emoji: "🐻",
+      explanation: "Correct! A hibernating bear is still living. Its metabolism has slowed way down, but it is still maintaining homeostasis and carrying out life processes. It will wake up in spring."
+    },
+    {
+      text: "A fossilized dinosaur bone in a museum",
+      hint: "Over millions of years, minerals replaced all the original bone material.",
+      answer: "nonliving",
+      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Dinosaur_bone_dig.jpg/640px-Dinosaur_bone_dig.jpg",
+      emoji: "🦕",
+      explanation: "Tricky one! A fossilized bone is non-living. Minerals completely replaced the original living material over millions of years — a natural process that transforms it into rock-like minerals, moving it out of the dead category into non-living."
+    }
+  ];
+
+  let cur = 0, score = 0, answered = false;
+
+  function buildPips() {
+    const row = document.getElementById('prow');
+    row.innerHTML = '';
+    for (let i = 0; i < Qs.length; i++) {
+      const p = document.createElement('div');
+      p.className = 'pip' + (i < cur ? ' done' : i === cur ? ' cur' : '');
+      row.appendChild(p);
+    }
+  }
+
+  function loadQ() {
+    if (cur >= Qs.length) { showFinal(); return; }
+    const q = Qs[cur];
+    answered = false;
+
+    const wrap = document.getElementById('qimgwrap');
+    wrap.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = q.img;
+    img.alt = q.text;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:10px';
+    img.onerror = function() {
+      wrap.innerHTML = '<span class="emoji-fb">' + q.emoji + '</span>';
+    };
+    wrap.appendChild(img);
+
+    document.getElementById('qt').textContent = q.text;
+    document.getElementById('qh').textContent = q.hint;
+    document.getElementById('fbx').className = 'fb';
+    document.getElementById('nxtb').className = 'nxt';
+    ['bl','bd','bn'].forEach(function(id) {
+      const b = document.getElementById(id);
+      b.className = 'cb';
+      b.disabled = false;
+    });
+    document.getElementById('tot').textContent = Qs.length;
+    document.getElementById('sc').textContent = score;
+    buildPips();
+  }
+
+  function ans(choice) {
+    if (answered) return;
+    answered = true;
+    const q = Qs[cur];
+    const ok = (choice === q.answer);
+    if (ok) score++;
+
+    const map = { living: 'bl', dead: 'bd', nonliving: 'bn' };
+    document.getElementById(map[choice]).className = 'cb ' + (ok ? 'correct' : 'wrong');
+    if (!ok) document.getElementById(map[q.answer]).className = 'cb correct';
+    ['bl','bd','bn'].forEach(function(id) { document.getElementById(id).disabled = true; });
+
+    const fb = document.getElementById('fbx');
+    fb.className = 'fb show ' + (ok ? 'correct' : 'wrong');
+    fb.textContent = ok ? q.explanation : 'Not quite. ' + q.explanation;
+
+    document.getElementById('nxtb').className = 'nxt show';
+    document.getElementById('sc').textContent = score;
+  }
+
+  function nextQ() { cur++; loadQ(); }
+
+  function goTab(tab) {
+    ['r1','r2','r3','rfin'].forEach(function(t) {
+      document.getElementById(t).classList.add('hidden');
+    });
+    document.getElementById(tab).classList.remove('hidden');
+    document.querySelectorAll('.tb').forEach(function(b, i) {
+      b.classList.toggle('active', ['r1','r2','r3'][i] === tab);
+    });
+    if (tab === 'r1') loadQ();
+  }
+
+  function rv(id) {
+    document.getElementById(id).classList.add('show');
+  }
+
+  function submitCER() {
+    const claim    = document.getElementById('cc').value.trim();
+    const evidence = document.getElementById('ce').value.trim();
+    const reasoning = document.getElementById('crr').value.trim();
+    const note = document.getElementById('cernote');
+
+    if (!claim && !evidence && !reasoning) {
+      note.className = 'cer-note show';
+      note.innerHTML = '<strong>Reminder:</strong> Fill in your Claim, Evidence, and Reasoning before submitting. Each partner should contribute at least one idea!';
+      return;
+    }
+
+    note.className = 'cer-note show';
+    note.innerHTML =
+      '<strong>Great work submitting your CER!</strong><br><br>' +
+      'Check your thinking against these questions:<br>' +
+      '&bull; Did you clearly state if the object is <em>living</em>, <em>dead</em>, or <em>non-living</em>?<br>' +
+      '&bull; Did you use at least one characteristic of living things as evidence?<br>' +
+      '&bull; Did your reasoning explain <em>why</em> the evidence supports your claim?<br><br>' +
+      '<strong>Hint:</strong> An acorn is a seed. Does it have the <em>potential</em> to grow and reproduce?';
+  }
+
+  function showFinal() {
+    document.querySelectorAll('.tb').forEach(function(b) { b.style.display = 'none'; });
+    ['r1','r2','r3'].forEach(function(t) { document.getElementById(t).classList.add('hidden'); });
+    document.getElementById('rfin').classList.remove('hidden');
+
+    const pct = score / Qs.length;
+    const stars = pct >= 0.875 ? '★★★' : pct >= 0.625 ? '★★☆' : '★☆☆';
+    const labels = {
+      '★★★': 'Outstanding — you two are real scientists!',
+      '★★☆': 'Strong work — review a couple and try again!',
+      '★☆☆': 'Good effort — re-read your notes and go again!'
+    };
+    document.getElementById('starr').textContent  = stars;
+    document.getElementById('fscore').textContent = score + ' / ' + Qs.length;
+    document.getElementById('flbl').textContent   = labels[stars];
+  }
+
+  function restart() {
+    cur = 0; score = 0;
+    document.querySelectorAll('.tb').forEach(function(b) { b.style.display = ''; });
+    document.getElementById('cernote').className = 'cer-note';
+    ['cc','ce','crr'].forEach(function(id) { document.getElementById(id).value = ''; });
+    goTab('r1');
+  }
+
+  loadQ();
+</script>
+</body>
+</html>
