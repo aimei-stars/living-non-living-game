@@ -89,6 +89,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .r2-done-box.show{display:block}
 .r2-done-box h3{font-size:17px;font-weight:800;color:#3b6d11;margin-bottom:4px}
 .r2-done-box p{font-size:13px;color:#3b6d11}
+.r2-next{display:none;width:100%;margin-top:8px;background:#1a1a1a;border:none;border-radius:9px;padding:11px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;font-family:inherit;transition:background .12s}
+.r2-next:hover{background:#333}
+.r2-next.show{display:block}
 .cercard{background:#fff;border:1px solid #e0e0e0;border-radius:16px;padding:1.4rem;margin-bottom:10px}
 .cercard .cq{font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:6px;line-height:1.5}
 .cercard .csub{font-size:13px;color:#777;margin-bottom:1rem;line-height:1.5}
@@ -401,23 +404,21 @@ function addPts(player,pts,round){
 
 /* UNIFIED AWARD HANDLER */
 function doAward(round,player){
-  var awardId=round+'-award'; // not used for R2 (handled separately)
   if(round==='r1'){
     if(awardGiven.r1)return;
     awardGiven.r1=true;
+    // addPts handles p1r/p2r accumulation — do NOT also increment r1p1/r1p2 here
     addPts(player,1,0);
     r1p1+=(player===1||player===0)?1:0;
     r1p2+=(player===2||player===0)?1:0;
     document.getElementById('r1award').querySelectorAll('.award-btn').forEach(function(b){b.disabled=true;});
     document.getElementById('nxtb').className='nxt show';
-    // Reset for next question
-    awardGiven.r1=false;
+    // NOTE: awardGiven.r1 stays true until r1next() resets it for the next question
   } else if(round==='r3'){
     if(awardGiven.r3)return;
     awardGiven.r3=true;
     addPts(player,1,2);
-    p1r[2]=(player===1||player===0)?1:0;
-    p2r[2]=(player===2||player===0)?1:0;
+    // addPts already handles p1r[2] and p2r[2] — do NOT overwrite here
     roundDone[2]=true;
     document.getElementById('tab-r3').classList.add('done-tab');
     document.getElementById('r3award').querySelectorAll('.award-btn').forEach(function(b){b.disabled=true;});
@@ -477,11 +478,16 @@ function r1ans(choice){
   document.getElementById('r1award').className='award-panel show';
 }
 
-function r1next(){r1cur++;awardGiven.r1=false;loadQ1();}
+function r1next(){
+  r1cur++;
+  awardGiven.r1=false;  // reset guard so next question can accept an award
+  loadQ1();
+}
 
 function finishR1(){
   roundDone[0]=true;
-  p1r[0]=r1p1; p2r[0]=r1p2;
+  // p1r[0] and p2r[0] are already correctly accumulated by addPts() each question
+  // r1p1/r1p2 are tracked separately just for the round-done display
   document.getElementById('tab-r1').classList.add('done-tab');
   updateScoreboard();
   var wrap=document.getElementById('qimgwrap');wrap.innerHTML='<span style="font-size:60px;line-height:1">🏁</span>';
@@ -569,8 +575,9 @@ function r2award(player,ap){
   r2p2+=(player===2||player===0)?1:0;
   addPts(player,1,1);
   ap.querySelectorAll('.award-btn').forEach(function(b){b.disabled=true;});
-  var nxt=ap.parentNode.querySelector('.r2-next');
-  if(nxt)nxt.style.display='block';
+  var card=ap.parentNode;
+  var nxt=card.querySelector('.r2-next');
+  if(nxt){nxt.className='r2-next show';}
 }
 
 function finishR2(){
