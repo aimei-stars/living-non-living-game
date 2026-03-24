@@ -463,6 +463,8 @@ function loadQ1(){
   document.getElementById('r1award').className='award-panel';
   document.getElementById('nxtb').className='nxt';
   ['bl','bd','bn'].forEach(function(id){var b=document.getElementById(id);b.className='cb';b.disabled=false;});
+  // Re-enable all award buttons so they work on every new question
+  document.getElementById('r1award').querySelectorAll('.award-btn').forEach(function(b){b.disabled=false;});
   buildPips();
 }
 
@@ -678,15 +680,3 @@ function restartAll(){
   ['fp1total','fp2total'].forEach(function(id){document.getElementById(id).classList.remove('champ-pts');});
   document.querySelectorAll('.tb').forEach(function(b){b.style.display='';b.classList.remove('done-tab');});
   document.getElementById('rfin').classList.add('hidden');
-  updateScoreboard();
-  goTab('r1');
-}
-
-/* INIT */
-document.addEventListener('DOMContentLoaded', function(){
-  updateScoreboard();
-  goTab('r1');
-});
-</script>
-</body>
-</html>
