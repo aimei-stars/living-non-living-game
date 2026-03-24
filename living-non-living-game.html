@@ -63,6 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .award-btn.p1{border-color:#185fa5;color:#185fa5;background:#e6f1fb}
 .award-btn.p2{border-color:#854f0b;color:#854f0b;background:#faeeda}
 .award-btn.both{border-color:#3b6d11;color:#3b6d11;background:#eaf3de}
+.award-btn.none{border-color:#a32d2d;color:#a32d2d;background:#fcebeb}
 .award-btn:disabled{cursor:default;opacity:.55}
 .nxt{display:none;width:100%;margin-top:12px;background:#1a1a1a;border:none;border-radius:10px;padding:13px;cursor:pointer;font-size:15px;font-weight:700;color:#fff;font-family:inherit;transition:background .12s}
 .nxt:hover{background:#333}
@@ -174,10 +175,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
     <div class="fb" id="fbx"></div>
     <div class="award-panel" id="r1award">
       <div class="ap-title">Who answered correctly? Award the point:</div>
-      <div class="award-btns">
+      <div class="award-btns" style="grid-template-columns:1fr 1fr;">
         <button class="award-btn p1" onclick="doAward('r1',1)">+ Player 1</button>
-        <button class="award-btn both" onclick="doAward('r1',0)">+ Both</button>
         <button class="award-btn p2" onclick="doAward('r1',2)">+ Player 2</button>
+        <button class="award-btn both" onclick="doAward('r1',0)">+ Both correct</button>
+        <button class="award-btn none" onclick="doAward('r1',-1)">Neither correct</button>
       </div>
     </div>
     <button class="nxt" id="nxtb" onclick="r1next()">Next Question &rarr;</button>
@@ -407,18 +409,19 @@ function doAward(round,player){
   if(round==='r1'){
     if(awardGiven.r1)return;
     awardGiven.r1=true;
-    // addPts handles p1r/p2r accumulation — do NOT also increment r1p1/r1p2 here
-    addPts(player,1,0);
-    r1p1+=(player===1||player===0)?1:0;
-    r1p2+=(player===2||player===0)?1:0;
+    // player: 1=P1, 2=P2, 0=both correct, -1=neither correct (no points awarded)
+    if(player>=0){
+      addPts(player,1,0);
+      r1p1+=(player===1||player===0)?1:0;
+      r1p2+=(player===2||player===0)?1:0;
+    }
     document.getElementById('r1award').querySelectorAll('.award-btn').forEach(function(b){b.disabled=true;});
+    // Only show Next button AFTER award is given — this is the key fix
     document.getElementById('nxtb').className='nxt show';
-    // NOTE: awardGiven.r1 stays true until r1next() resets it for the next question
   } else if(round==='r3'){
     if(awardGiven.r3)return;
     awardGiven.r3=true;
-    addPts(player,1,2);
-    // addPts already handles p1r[2] and p2r[2] — do NOT overwrite here
+    if(player>=0){addPts(player,1,2);}
     roundDone[2]=true;
     document.getElementById('tab-r3').classList.add('done-tab');
     document.getElementById('r3award').querySelectorAll('.award-btn').forEach(function(b){b.disabled=true;});
@@ -475,7 +478,9 @@ function r1ans(choice){
   var fb=document.getElementById('fbx');
   fb.className='fb show '+(ok?'correct':'wrong');
   fb.innerHTML=(ok?'<strong>Correct!</strong> ':'<strong>Not quite.</strong> ')+q.exp;
+  // Show award panel — Next button stays hidden until an award button is clicked
   document.getElementById('r1award').className='award-panel show';
+  document.getElementById('nxtb').className='nxt';
 }
 
 function r1next(){
@@ -670,16 +675,4 @@ function restartAll(){
   awardGiven={r1:false,r2:false,r3:false};
   r2p1=0;r2p2=0;r1p1=0;r1p2=0;
   ['fp1card','fp2card'].forEach(function(id){document.getElementById(id).classList.remove('champ');});
-  ['fp1total','fp2total'].forEach(function(id){document.getElementById(id).classList.remove('champ-pts');});
-  document.querySelectorAll('.tb').forEach(function(b){b.style.display='';b.classList.remove('done-tab');});
-  document.getElementById('rfin').classList.add('hidden');
-  updateScoreboard();
-  goTab('r1');
-}
-
-/* INIT */
-updateScoreboard();
-initR1();
-</script>
-</body>
-</html>
+  ['fp1total','fp2total'].forEach(function(id){document.getElementById(id).classL
