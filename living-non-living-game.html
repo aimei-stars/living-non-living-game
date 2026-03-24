@@ -546,8 +546,8 @@ function renderR2(){
   // Award panel
   var ap=document.createElement('div');ap.className='award-panel';
   var apt=document.createElement('div');apt.className='ap-title';apt.textContent='Who got it right? Award the point:';ap.appendChild(apt);
-  var abtn=document.createElement('div');abtn.className='award-btns';
-  [{l:'+ Player 1',c:'p1',pl:1},{l:'+ Both',c:'both',pl:0},{l:'+ Player 2',c:'p2',pl:2}].forEach(function(o){
+  var abtn=document.createElement('div');abtn.className='award-btns';abtn.style.gridTemplateColumns='1fr 1fr';
+  [{l:'+ Player 1',c:'p1',pl:1},{l:'+ Player 2',c:'p2',pl:2},{l:'+ Both correct',c:'both',pl:0},{l:'Neither correct',c:'none',pl:-1}].forEach(function(o){
     var b=document.createElement('button');b.className='award-btn '+o.c;b.textContent=o.l;
     (function(pl,apanel){b.onclick=function(){r2award(pl,apanel);};})(o.pl,ap);
     abtn.appendChild(b);
@@ -578,9 +578,11 @@ function r2selectAns(choice,card,q){
 function r2award(player,ap){
   if(r2AwardGiven)return;
   r2AwardGiven=true;
-  r2p1+=(player===1||player===0)?1:0;
-  r2p2+=(player===2||player===0)?1:0;
-  addPts(player,1,1);
+  if(player>=0){
+    r2p1+=(player===1||player===0)?1:0;
+    r2p2+=(player===2||player===0)?1:0;
+    addPts(player,1,1);
+  }
   ap.querySelectorAll('.award-btn').forEach(function(b){b.disabled=true;});
   var card=ap.parentNode;
   var nxt=card.querySelector('.r2-next');
@@ -678,5 +680,4 @@ function restartAll(){
   r2p1=0;r2p2=0;r1p1=0;r1p2=0;
   ['fp1card','fp2card'].forEach(function(id){document.getElementById(id).classList.remove('champ');});
   ['fp1total','fp2total'].forEach(function(id){document.getElementById(id).classList.remove('champ-pts');});
-  document.querySelectorAll('.tb').forEach(function(b){b.style.display='';b.classList.remove('done-tab');});
-  document.getElementById('rfin').classList.add('hidden');
+  document.querySelectorAll('.tb').forEach(function(b)
