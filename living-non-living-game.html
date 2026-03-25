@@ -120,6 +120,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .restart:hover{background:#333}
 .go-results{background:#3b6d11;border:none;border-radius:10px;padding:12px 24px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;font-family:inherit;margin-top:12px;display:block;width:100%;transition:background .12s}
 .go-results:hover{background:#27500a}
+/* Round 3 drag-and-drop */
+.r3-inst{background:#e6f1fb;border:1px solid #85b7eb;border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:#0c447c;line-height:1.6}
+.r3-scorebar{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:1rem}
+.r3-sc-card{background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;padding:8px 12px;text-align:center}
+.r3-sc-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:2px}
+.r3-sc-pts{font-size:28px;font-weight:800;color:#1a1a1a}
+.r3-sc-card.r3-leader{border-color:#ba7517;background:#fdf6ec}
+.r3-sc-card.r3-leader .r3-sc-pts{color:#ba7517}
+.r3-sc-mid{text-align:center;font-size:13px;font-weight:700;color:#888}
+.r3-cards-wrap{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;min-height:60px;padding:10px;background:#f5f5f0;border-radius:12px;border:1.5px dashed #ddd}
+.r3-card{background:#fff;border:1.5px solid #ddd;border-radius:10px;padding:10px 12px;cursor:grab;font-size:13px;font-weight:700;color:#1a1a1a;text-align:center;user-select:none;transition:box-shadow .12s,opacity .12s;display:flex;align-items:center;gap:8px;min-width:120px}
+.r3-card:active{cursor:grabbing}
+.r3-card.dragging{opacity:.4}
+.r3-card .r3-card-emoji{font-size:22px;line-height:1;flex-shrink:0}
+.r3-card .r3-card-label{font-size:12px;font-weight:600;color:#333;line-height:1.3;text-align:left}
+.r3-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem}
+.r3-col{border-radius:12px;overflow:hidden;border:1.5px solid #e0e0e0}
+.r3-col-title{padding:10px 8px;font-size:13px;font-weight:800;text-align:center;line-height:1.3}
+.living-title{background:#eaf3de;color:#3b6d11}
+.dead-title{background:#faeeda;color:#633806}
+.nonliving-title{background:#e6f1fb;color:#0c447c}
+.r3-drop-zone{min-height:120px;padding:8px;background:#fafaf8;display:flex;flex-direction:column;gap:6px}
+.r3-drop-zone.drag-over{background:#f0f8e8;border:2px dashed #639922}
+.r3-placed{border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.r3-placed.correct{background:#eaf3de;color:#3b6d11;border:1px solid #97c459}
+.r3-placed.wrong{background:#fcebeb;color:#791f1f;border:1px solid #f09595}
+.r3-placed .r3-placed-emoji{font-size:18px;line-height:1;flex-shrink:0}
+.r3-placed .r3-placed-check{font-size:14px;margin-left:auto;flex-shrink:0}
+.r3-feedback{min-height:40px;font-size:14px;font-weight:600;text-align:center;padding:8px;margin-bottom:8px;border-radius:9px;transition:all .2s}
+.r3-feedback.correct{background:#eaf3de;color:#3b6d11}
+.r3-feedback.wrong{background:#fcebeb;color:#791f1f}
+.r3-done-box{background:#fff;border:1.5px solid #e0e0e0;border-radius:16px;padding:2rem 1.5rem;text-align:center;margin-top:1rem}
+.r3-done-box.show{display:block!important}
+.r3-done-trophy{font-size:48px;margin-bottom:8px}
+.r3-done-title{font-size:20px;font-weight:800;color:#1a1a1a;margin-bottom:4px}
+.r3-done-sub{font-size:14px;color:#666;margin-bottom:1rem}
 .hidden{display:none!important}
 @media(max-width:450px){.choices,.answer-btns,.award-btns,.fin-breakdown{grid-template-columns:1fr}.tabs{flex-direction:column}.hdr h1{font-size:21px}}
 </style>
@@ -192,28 +228,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 
 <!-- ROUND 3 -->
 <div id="r3" class="hidden">
-  <div class="plabel">Round 3 &mdash; Defend It (CER)</div>
-  <div class="cercard">
-    <div class="cerimg"><img id="cerimg" alt="mystery object"/></div>
-    <p class="cq" id="cerq"></p>
-    <p class="csub">Use evidence from the characteristics of living things to support your answer.</p>
-    <div class="clabel">Claim &mdash; What category is it?</div>
-    <textarea id="cc" placeholder="The object is _______ because..."></textarea>
-    <div class="clabel">Evidence &mdash; What facts support your claim?</div>
-    <textarea id="ce" placeholder="We know this because..."></textarea>
-    <div class="clabel">Reasoning &mdash; How does your evidence connect to science?</div>
-    <textarea id="crr" placeholder="This connects to the characteristic of... which means..."></textarea>
-    <button class="subcer" id="subcerbtn" onclick="submitCER()">Check Our Thinking</button>
-    <div class="cer-note" id="cernote"></div>
-    <div class="award-panel" id="r3award">
-      <div class="ap-title">Who wrote the strongest CER? Award the point:</div>
-      <div class="award-btns">
-        <button class="award-btn p1" onclick="doAward('r3',1)">+ Player 1</button>
-        <button class="award-btn both" onclick="doAward('r3',0)">+ Both</button>
-        <button class="award-btn p2" onclick="doAward('r3',2)">+ Player 2</button>
-      </div>
+  <div class="plabel">Round 3 &mdash; Drag &amp; Drop Match-Up</div>
+  <div class="r3-inst">
+    Drag each object card into the correct category column. Both players take turns dragging. Score a point for each correct match!
+  </div>
+  <div class="r3-scorebar">
+    <div class="r3-sc-card" id="r3p1card">
+      <div class="r3-sc-name">Player 1</div>
+      <div class="r3-sc-pts" id="r3p1pts">0</div>
     </div>
-    <button class="go-results hidden" id="go-results" onclick="showFinal()">See Final Results &rarr;</button>
+    <div class="r3-sc-mid" id="r3progress">0 / 9 matched</div>
+    <div class="r3-sc-card" id="r3p2card">
+      <div class="r3-sc-name">Player 2</div>
+      <div class="r3-sc-pts" id="r3p2pts">0</div>
+    </div>
+  </div>
+  <div id="r3cards-area"></div>
+  <div class="r3-cols">
+    <div class="r3-col" id="drop-living" data-cat="living">
+      <div class="r3-col-title living-title">Living</div>
+      <div class="r3-drop-zone" id="zone-living"></div>
+    </div>
+    <div class="r3-col" id="drop-dead" data-cat="dead">
+      <div class="r3-col-title dead-title">Dead<br>(once living)</div>
+      <div class="r3-drop-zone" id="zone-dead"></div>
+    </div>
+    <div class="r3-col" id="drop-nonliving" data-cat="nonliving">
+      <div class="r3-col-title nonliving-title">Non-living</div>
+      <div class="r3-drop-zone" id="zone-nonliving"></div>
+    </div>
+  </div>
+  <div class="r3-feedback" id="r3feedback"></div>
+  <div class="r3-done-box hidden" id="r3done">
+    <div class="r3-done-trophy" id="r3donetrophy"></div>
+    <div class="r3-done-title" id="r3donetitle"></div>
+    <div class="r3-done-sub" id="r3donesub"></div>
+    <button class="go-results" id="go-results" onclick="showFinal()">See Final Results &rarr;</button>
   </div>
 </div>
 
@@ -396,19 +446,7 @@ function addPts(player,pts,round){
   updateScoreboard();
 }
 
-/* AWARD HANDLER — Round 3 only (Round 1 handled inline in r1ans, Round 2 in r2award) */
-function doAward(round,player){
-  if(round==='r3'){
-    if(awardGiven.r3)return;
-    awardGiven.r3=true;
-    if(player>=0){addPts(player,1,2);}
-    roundDone[2]=true;
-    document.getElementById('tab-r3').classList.add('done-tab');
-    document.getElementById('r3award').querySelectorAll('.award-btn').forEach(function(b){b.disabled=true;});
-    document.getElementById('go-results').classList.remove('hidden');
-    updateScoreboard();
-  }
-}
+/* AWARD HANDLER — Round 3 scoring is now automatic via drag-and-drop */
 
 /* TAB NAVIGATION */
 function goTab(tab){
@@ -618,37 +656,218 @@ function finishR2(){
   else{dt.textContent="Round 2 is a tie!";dp.textContent=r2p1+' pts each — well matched scientists!';}
 }
 
-/* ROUND 3 */
+/* ROUND 3 — DRAG & DROP MATCHING */
+var r3Items=[], r3matched=0, r3p1=0, r3p2=0, r3currentPlayer=1, r3dragId=null;
+
+var R3MATCH=[
+  {id:'m1',label:'Honeybee flying',emoji:'🐝',answer:'living'},
+  {id:'m2',label:'Shed snake skin',emoji:'🐍',answer:'dead'},
+  {id:'m3',label:'Glass marble',emoji:'🔵',answer:'nonliving'},
+  {id:'m4',label:'Mushroom on a log',emoji:'🍄',answer:'living'},
+  {id:'m5',label:'Pressed dry flower',emoji:'🌸',answer:'dead'},
+  {id:'m6',label:'Rubber car tire',emoji:'⚫',answer:'nonliving'},
+  {id:'m7',label:'Caterpillar in chrysalis',emoji:'🦋',answer:'living'},
+  {id:'m8',label:'Shark tooth on beach',emoji:'🦷',answer:'dead'},
+  {id:'m9',label:'Piece of chalk',emoji:'✏️',answer:'nonliving'},
+  {id:'m10',label:'Venus flytrap',emoji:'🌿',answer:'living'},
+  {id:'m11',label:'Feather on ground',emoji:'🪶',answer:'dead'},
+  {id:'m12',label:'Block of ice',emoji:'🧊',answer:'nonliving'},
+  {id:'m13',label:'Frog eggs in pond',emoji:'🐸',answer:'living'},
+  {id:'m14',label:'Seashell on beach',emoji:'🐚',answer:'dead'},
+  {id:'m15',label:'Wooden pencil',emoji:'✏️',answer:'nonliving'},
+  {id:'m16',label:'Cactus in desert',emoji:'🌵',answer:'living'},
+  {id:'m17',label:'Driftwood on shore',emoji:'🪵',answer:'dead'},
+  {id:'m18',label:'Steel paper clip',emoji:'📎',answer:'nonliving'},
+  {id:'m19',label:'Dormant tulip bulb',emoji:'🌷',answer:'living'},
+  {id:'m20',label:'Sand dollar on beach',emoji:'🔵',answer:'dead'},
+  {id:'m21',label:'Glass of milk',emoji:'🥛',answer:'nonliving'},
+  {id:'m22',label:'Spider on its web',emoji:'🕷️',answer:'living'},
+  {id:'m23',label:'Dog bone (pet store)',emoji:'🦴',answer:'dead'},
+  {id:'m24',label:'Lit candle',emoji:'🕯️',answer:'nonliving'},
+  {id:'m25',label:'Hibernating bear',emoji:'🐻',answer:'living'},
+  {id:'m26',label:'Dried pressed leaf',emoji:'🍂',answer:'dead'},
+  {id:'m27',label:'Leather belt',emoji:'👜',answer:'nonliving'},
+  {id:'m28',label:'Lichen on rock',emoji:'🪨',answer:'living'},
+  {id:'m29',label:'Peacock feather',emoji:'🪶',answer:'dead'},
+  {id:'m30',label:'Stick of butter',emoji:'🧈',answer:'nonliving'}
+];
+
 function initR3(){
-  r3q=pick(R3BANK,1)[0];
-  document.getElementById('cerq').textContent=r3q.q;
-  var ci=document.getElementById('cerimg');
-  setImg(ci,r3q.img,r3q.emoji);
-  ['cc','ce','crr'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('cernote').className='cer-note';
-  document.getElementById('r3award').className='award-panel';
-  document.getElementById('go-results').className='go-results hidden';
+  r3matched=0; r3p1=0; r3p2=0; r3currentPlayer=1; r3dragId=null;
   awardGiven.r3=false;
+  r3Items=pick(R3MATCH,9);
+
+  // Update score display
+  document.getElementById('r3p1pts').textContent='0';
+  document.getElementById('r3p2pts').textContent='0';
+  document.getElementById('r3progress').textContent='0 / 9 matched';
+  document.getElementById('r3p1card').classList.remove('r3-leader');
+  document.getElementById('r3p2card').classList.remove('r3-leader');
+  document.getElementById('r3feedback').className='r3-feedback';
+  document.getElementById('r3feedback').textContent='';
+  document.getElementById('r3done').className='r3-done-box hidden';
+
+  // Clear drop zones
+  ['zone-living','zone-dead','zone-nonliving'].forEach(function(id){
+    document.getElementById(id).innerHTML='';
+  });
+
+  // Build card tray
+  var area=document.getElementById('r3cards-area');
+  area.innerHTML='';
+  var wrap=document.createElement('div');
+  wrap.className='r3-cards-wrap';
+  wrap.id='r3tray';
+
+  // Whose turn indicator
+  var turnDiv=document.createElement('div');
+  turnDiv.id='r3turn';
+  turnDiv.style.cssText='text-align:center;font-size:13px;font-weight:700;color:#185fa5;margin-bottom:8px;padding:6px 10px;background:#e6f1fb;border-radius:8px';
+  turnDiv.textContent='Player 1 — drag a card to the correct column!';
+  area.appendChild(turnDiv);
+  area.appendChild(wrap);
+
+  r3Items.forEach(function(item){
+    var card=document.createElement('div');
+    card.className='r3-card';
+    card.setAttribute('draggable','true');
+    card.setAttribute('data-id',item.id);
+    card.innerHTML='<span class="r3-card-emoji">'+item.emoji+'</span><span class="r3-card-label">'+item.label+'</span>';
+
+    // Desktop drag events
+    card.addEventListener('dragstart',function(e){
+      r3dragId=item.id;
+      setTimeout(function(){card.classList.add('dragging');},0);
+      if(e.dataTransfer){e.dataTransfer.setData('text/plain',item.id);}
+    });
+    card.addEventListener('dragend',function(){
+      card.classList.remove('dragging');
+    });
+
+    // Touch events for Chromebooks / tablets
+    card.addEventListener('touchstart',function(e){
+      r3dragId=item.id;
+      card.classList.add('dragging');
+      e.preventDefault();
+    },{passive:false});
+    card.addEventListener('touchend',function(e){
+      card.classList.remove('dragging');
+      var touch=e.changedTouches[0];
+      var el=document.elementFromPoint(touch.clientX,touch.clientY);
+      var zone=el ? el.closest('.r3-drop-zone') : null;
+      if(zone){
+        var cat=zone.parentNode.getAttribute('data-cat');
+        r3handleDrop(item.id,cat,card);
+      }
+      r3dragId=null;
+      e.preventDefault();
+    },{passive:false});
+
+    wrap.appendChild(card);
+  });
+
+  // Set up drop zones
+  ['living','dead','nonliving'].forEach(function(cat){
+    var zone=document.getElementById('zone-'+cat);
+    zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('drag-over');});
+    zone.addEventListener('dragleave',function(){zone.classList.remove('drag-over');});
+    zone.addEventListener('drop',function(e){
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      if(r3dragId){r3handleDrop(r3dragId,cat,null);r3dragId=null;}
+    });
+  });
 }
 
-function submitCER(){
-  var claim=document.getElementById('cc').value.trim();
-  var ev=document.getElementById('ce').value.trim();
-  var reas=document.getElementById('crr').value.trim();
-  var note=document.getElementById('cernote');
-  if(!claim&&!ev&&!reas){
-    note.className='cer-note show';
-    note.innerHTML='<strong>Reminder:</strong> Fill in your Claim, Evidence, and Reasoning before checking. Each partner should contribute at least one idea!';
-    return;
+function r3handleDrop(itemId,droppedCat,cardEl){
+  var item=null;
+  for(var i=0;i<r3Items.length;i++){if(r3Items[i].id===itemId){item=r3Items[i];break;}}
+  if(!item)return;
+
+  // Find and remove card from tray
+  var card=cardEl||document.querySelector('[data-id="'+itemId+'"]');
+  if(!card||card.parentNode.id!=='r3tray')return; // already placed
+
+  var correct=(droppedCat===item.answer);
+  var fb=document.getElementById('r3feedback');
+
+  // Place item in drop zone
+  var zone=document.getElementById('zone-'+droppedCat);
+  var placed=document.createElement('div');
+  placed.className='r3-placed '+(correct?'correct':'wrong');
+  placed.innerHTML=
+    '<span class="r3-placed-emoji">'+item.emoji+'</span>'+
+    '<span style="font-size:12px;font-weight:600;flex:1;text-align:left">'+item.label+'</span>'+
+    '<span class="r3-placed-check">'+(correct?'✓':'✗')+'</span>';
+  zone.appendChild(placed);
+
+  // Remove card from tray
+  card.parentNode.removeChild(card);
+
+  // Award point to current player
+  if(correct){
+    if(r3currentPlayer===1){r3p1++;document.getElementById('r3p1pts').textContent=r3p1;}
+    else{r3p2++;document.getElementById('r3p2pts').textContent=r3p2;}
+    addPts(r3currentPlayer,1,2);
+    fb.className='r3-feedback correct';
+    fb.textContent='Correct! '+(r3currentPlayer===1?'Player 1':'Player 2')+' scores a point!';
+  } else {
+    // Wrong — show correct category name
+    var catNames={living:'Living',dead:'Dead (once living)',nonliving:'Non-living'};
+    fb.className='r3-feedback wrong';
+    fb.textContent='Not quite — '+item.label+' is '+catNames[item.answer]+'. No point this time.';
   }
-  note.className='cer-note show';
-  note.innerHTML=
-    '<strong>Good work!</strong> Check your CER against these questions:<br><br>'+
-    '&bull; Did you clearly state if the object is <em>living</em>, <em>dead</em>, or <em>non-living</em>?<br>'+
-    '&bull; Did you use at least one characteristic of living things as evidence?<br>'+
-    '&bull; Did your reasoning explain <em>why</em> the evidence supports your claim?<br><br>'+
-    '<strong>Hint:</strong> '+r3q.hint;
-  document.getElementById('r3award').className='award-panel show';
+
+  // Update leader highlight
+  document.getElementById('r3p1card').classList.toggle('r3-leader',r3p1>r3p2);
+  document.getElementById('r3p2card').classList.toggle('r3-leader',r3p2>r3p1);
+
+  r3matched++;
+  document.getElementById('r3progress').textContent=r3matched+' / '+r3Items.length+' matched';
+
+  // Switch player
+  r3currentPlayer=(r3currentPlayer===1)?2:1;
+  var turnDiv=document.getElementById('r3turn');
+  if(turnDiv){
+    turnDiv.style.background=r3currentPlayer===1?'#e6f1fb':'#faeeda';
+    turnDiv.style.color=r3currentPlayer===1?'#185fa5':'#854f0b';
+    turnDiv.textContent='Player '+r3currentPlayer+' — drag a card to the correct column!';
+  }
+
+  if(r3matched>=r3Items.length){
+    setTimeout(finishR3,600);
+  }
+}
+
+function finishR3(){
+  roundDone[2]=true;
+  p1r[2]=r3p1; p2r[2]=r3p2;
+  document.getElementById('tab-r3').classList.add('done-tab');
+  updateScoreboard();
+
+  var done=document.getElementById('r3done');
+  done.className='r3-done-box show';
+  var trophy=document.getElementById('r3donetrophy');
+  var title=document.getElementById('r3donetitle');
+  var sub=document.getElementById('r3donesub');
+  var turn=document.getElementById('r3turn');
+  if(turn)turn.style.display='none';
+
+  if(r3p1>r3p2){
+    trophy.textContent='🏆';
+    title.textContent='Player 1 wins Round 3!';
+    sub.textContent=r3p1+' pts vs '+r3p2+' pts — great matching!';
+  } else if(r3p2>r3p1){
+    trophy.textContent='🏆';
+    title.textContent='Player 2 wins Round 3!';
+    sub.textContent=r3p2+' pts vs '+r3p1+' pts — great matching!';
+  } else {
+    trophy.textContent='🤝';
+    title.textContent="Round 3 is a tie!";
+    sub.textContent=r3p1+' pts each — perfectly matched scientists!';
+  }
+  document.getElementById('r3feedback').className='r3-feedback';
+  document.getElementById('r3feedback').textContent='';
 }
 
 /* FINAL */
@@ -693,6 +912,7 @@ function restartAll(){
   roundDone=[false,false,false];
   awardGiven={r1:false,r2:false,r3:false};
   r2p1=0;r2p2=0;r1p1=0;r1p2=0;
+  r3p1=0;r3p2=0;r3matched=0;r3currentPlayer=1;r3dragId=null;
   ['fp1card','fp2card'].forEach(function(id){document.getElementById(id).classList.remove('champ');});
   ['fp1total','fp2total'].forEach(function(id){document.getElementById(id).classList.remove('champ-pts');});
   document.querySelectorAll('.tb').forEach(function(b){b.style.display='';b.classList.remove('done-tab');});
